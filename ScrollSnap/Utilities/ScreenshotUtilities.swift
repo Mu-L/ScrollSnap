@@ -16,14 +16,17 @@ import ScreenCaptureKit
 /// - Note: Adjusts the rectangle for the screen’s coordinate system and scales the output based on the display’s pixel scale.
 func captureSingleScreenshot(_ rectangle: NSRect) async -> NSImage? {
     guard let activeScreen = screenContainingPoint(rectangle.origin),
-          let currentApp = await findCurrentSCApplication(),
-          let display = await getSCDisplay(from: activeScreen) else {
+          let captureContext = await resolveCaptureContext(for: activeScreen) else {
         print("Error: Unable to determine active screen or display.")
         return nil
     }
     
     let adjustedRect = adjustRectForScreen(rectangle, for: activeScreen)
-    let filter = SCContentFilter(display: display, excludingApplications: [currentApp], exceptingWindows: [])
+    let filter = SCContentFilter(
+        display: captureContext.display,
+        excludingApplications: captureContext.excludedApplications,
+        exceptingWindows: []
+    )
     let scaleFactor = Int(filter.pointPixelScale)
     
     let width = Int(adjustedRect.width) * scaleFactor
@@ -114,6 +117,11 @@ func saveImageToTemporaryFile(_ image: NSImage) -> URL? {
 
 // MARK: - Capture Helpers
 
+private struct ScreenCaptureContext {
+    let display: SCDisplay
+    let excludedApplications: [SCRunningApplication]
+}
+
 /// Determines which screen contains a given point.
 ///
 /// - Parameter point: The `NSPoint` to check against all available screens.
@@ -142,46 +150,37 @@ private func adjustRectForScreen(_ rect: NSRect, for screen: NSScreen) -> NSRect
     )
 }
 
-/// Retrieves the corresponding `SCDisplay` for a given `NSScreen` using its display ID.
+/// Resolves the ScreenCaptureKit display and the current app exclusion list from one content snapshot.
 ///
-/// This function is used to bridge AppKit's `NSScreen` with ScreenCaptureKit's `SCDisplay`, which is required for screenshot capture operations.
-///
-/// - Parameter nsScreen: The `NSScreen` to find the corresponding `SCDisplay` for.
-/// - Returns: The matching `SCDisplay` if found, or `nil` if the screen ID cannot be retrieved or no matching display exists.
-private func getSCDisplay(from nsScreen: NSScreen) async -> SCDisplay? {
+/// The filtered retrieval matches Apple's sample usage and avoids re-enumerating shareable content for
+/// the same screenshot.
+private func resolveCaptureContext(for nsScreen: NSScreen) async -> ScreenCaptureContext? {
     guard let screenID = nsScreen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? CGDirectDisplayID else {
         print("Error: Unable to retrieve screen ID.")
         return nil
     }
     
     do {
-        let displays = try await SCShareableContent.current.displays
-        return displays.first { $0.displayID == screenID }
-    } catch {
-        print("Error fetching SCDisplay: \(error)")
-        return nil
-    }
-}
-
-/// Finds the currently running application in ScreenCaptureKit's shareable content.
-///
-/// This is used to exclude the ScrollSnap app itself from screenshot captures, ensuring the overlay UI doesn't appear in the output.
-///
-/// - Returns: The `SCRunningApplication` representing the current app if found, or `nil` if not found or an error occurs.
-private func findCurrentSCApplication() async -> SCRunningApplication? {
-    do {
-        let apps = try await SCShareableContent.current.applications
-        let currentPID = NSRunningApplication.current.processIdentifier
+        let shareableContent = try await SCShareableContent.excludingDesktopWindows(
+            false,
+            onScreenWindowsOnly: true
+        )
         
-        // Search for the application based on its process ID.
-        if let app = apps.first(where: { $0.processID == currentPID }) {
-            return app
-        } else {
-            print("Current application not found in SCShareableContent.")
+        guard let display = shareableContent.displays.first(where: { $0.displayID == screenID }) else {
+            print("Error: Unable to resolve ScreenCaptureKit display.")
             return nil
         }
+        
+        let currentPID = NSRunningApplication.current.processIdentifier
+
+        let excludedApplications = shareableContent.applications.filter { $0.processID == currentPID }
+        if excludedApplications.isEmpty {
+            print("Current application not found in SCShareableContent.")
+        }
+        
+        return ScreenCaptureContext(display: display, excludedApplications: excludedApplications)
     } catch {
-        print("Error fetching applications: \(error)")
+        print("Error fetching shareable content: \(error)")
         return nil
     }
 }

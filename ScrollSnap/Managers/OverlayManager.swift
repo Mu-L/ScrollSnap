@@ -20,6 +20,7 @@ class OverlayManager {
     private var dragOffset: NSPoint = .zero
     private var overlayWindows: [NSWindow] = []
     private var isScrollingCaptureActive = false
+    private var isTimerCaptureInFlight = false
     private var captureTimer: Timer?
     private let stitchingManager = StitchingManager()
     var thumbnailWindow: NSWindow?
@@ -256,10 +257,17 @@ class OverlayManager {
     
     private func setupCaptureTimer() {
         captureTimer = Timer.scheduledTimer(withTimeInterval: 0.25, repeats: true) { [weak self] _ in
-            guard let self = self, self.isScrollingCaptureActive else { return }
+            guard let self = self,
+                  self.isScrollingCaptureActive,
+                  !self.isTimerCaptureInFlight else { return }
+            
+            self.isTimerCaptureInFlight = true
             
             Task {
                 await self.handleTimerCapture()
+                await MainActor.run {
+                    self.isTimerCaptureInFlight = false
+                }
             }
         }
     }
@@ -274,6 +282,7 @@ class OverlayManager {
     private func invalidateCaptureTimer() {
         captureTimer?.invalidate()
         captureTimer = nil
+        isTimerCaptureInFlight = false
     }
     
     // MARK: - Thumbnail Management
