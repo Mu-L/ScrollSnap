@@ -28,7 +28,7 @@ class OverlayView: NSView {
         self.manager = manager
         self.screenFrame = screenFrame
         self.selectionRectangleView = SelectionRectangleView(manager: manager, screenFrame: screenFrame)
-        super.init(frame: screenFrame)
+        super.init(frame: NSRect(origin: .zero, size: screenFrame.size))
         
         self.menuBarView = MenuBarView(manager: manager, screenFrame: screenFrame, overlayView: self)
         updateTrackingAreas()
@@ -48,7 +48,7 @@ class OverlayView: NSView {
     
     override func mouseDown(with event: NSEvent) {
         guard let manager = manager else { return }
-        let localPoint = event.locationInWindow
+        let localPoint = convertWindowToLocal(point: event.locationInWindow)
         let globalPoint = convertToGlobal(point: localPoint)
         
         let menuRect = manager.getMenuRectangle()
@@ -61,12 +61,14 @@ class OverlayView: NSView {
     }
     
     override func mouseDragged(with event: NSEvent) {
-        let globalPoint = convertToGlobal(point: event.locationInWindow)
+        let localPoint = convertWindowToLocal(point: event.locationInWindow)
+        let globalPoint = convertToGlobal(point: localPoint)
         selectionRectangleView.handleMouseDragged(to: globalPoint)
     }
     
     override func mouseUp(with event: NSEvent) {
-        let globalPoint = convertToGlobal(point: event.locationInWindow)
+        let localPoint = convertWindowToLocal(point: event.locationInWindow)
+        let globalPoint = convertToGlobal(point: localPoint)
         selectionRectangleView.handleMouseUp()
         menuBarView?.handleMouseUp(at: globalPoint)
         updateTrackingAreas()
@@ -97,7 +99,7 @@ class OverlayView: NSView {
     }
     
     func dirtyRect(forGlobalRect rect: NSRect, includesDimensionLabel: Bool) -> NSRect {
-        let localRect = rect.offsetBy(dx: -screenFrame.origin.x, dy: -screenFrame.origin.y)
+        let localRect = convertToLocal(rect: rect)
         
         if includesDimensionLabel {
             return selectionRectangleView.dirtyRect(for: localRect, showsDimensionLabel: true)
@@ -125,28 +127,29 @@ class OverlayView: NSView {
         let rectangle = manager.getRectangle()
         let menuRect = manager.getMenuRectangle()
         
-        // Convert global menu rect to local coordinates for this view
-        let localMenuRect = NSRect(
-            x: menuRect.origin.x - screenFrame.origin.x,
-            y: menuRect.origin.y - screenFrame.origin.y,
-            width: menuRect.width,
-            height: menuRect.height
-        )
+        let localRectangle = convertToLocal(rect: rectangle).intersection(bounds)
+        let localMenuRect = convertToLocal(rect: menuRect).intersection(bounds)
         
         let options: NSTrackingArea.Options = [.mouseEnteredAndExited, .activeAlways]
-        rectangleTrackingArea = NSTrackingArea(rect: rectangle, options: options, owner: self, userInfo: nil)
-        addTrackingArea(rectangleTrackingArea!)
+        if !localRectangle.isEmpty {
+            rectangleTrackingArea = NSTrackingArea(rect: localRectangle, options: options, owner: self, userInfo: nil)
+            addTrackingArea(rectangleTrackingArea!)
+        }
         
         // Border zones
         let zones = selectionRectangleView.calculateBorderZones(for: rectangle, inScreen: screenFrame)
         for (zone, rect) in zones {
-            let trackingArea = NSTrackingArea(rect: rect, options: options, owner: self, userInfo: ["zone": zone])
+            let localZoneRect = rect.intersection(bounds)
+            guard !localZoneRect.isEmpty else { continue }
+            let trackingArea = NSTrackingArea(rect: localZoneRect, options: options, owner: self, userInfo: ["zone": zone])
             borderTrackingAreas.append(trackingArea)
             addTrackingArea(trackingArea)
         }
         
-        menuTrackingArea = NSTrackingArea(rect: localMenuRect, options: options, owner: self, userInfo: ["type": "menu"])
-        addTrackingArea(menuTrackingArea!)
+        if !localMenuRect.isEmpty {
+            menuTrackingArea = NSTrackingArea(rect: localMenuRect, options: options, owner: self, userInfo: ["type": "menu"])
+            addTrackingArea(menuTrackingArea!)
+        }
     }
     
     override func mouseEntered(with event: NSEvent) {
@@ -196,7 +199,19 @@ class OverlayView: NSView {
     
     // MARK: - Coordinate Conversion
     
-    /// Converts a local point to global coordinates
+    private func convertWindowToLocal(point: NSPoint) -> NSPoint {
+        convert(point, from: nil)
+    }
+    
+    private func convertToLocal(point: NSPoint) -> NSPoint {
+        NSPoint(x: point.x - screenFrame.origin.x, y: point.y - screenFrame.origin.y)
+    }
+    
+    private func convertToLocal(rect: NSRect) -> NSRect {
+        NSRect(origin: convertToLocal(point: rect.origin), size: rect.size)
+    }
+    
+    /// Converts a local point to global coordinates.
     private func convertToGlobal(point: NSPoint) -> NSPoint {
         NSPoint(x: point.x + screenFrame.origin.x, y: point.y + screenFrame.origin.y)
     }

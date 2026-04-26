@@ -6,6 +6,12 @@
 import SwiftUI
 
 class OverlayManager {
+    private struct RestoredRect {
+        let rect: NSRect
+        let screenFrame: NSRect
+        let wasRepaired: Bool
+    }
+
     private struct SuspendedWindowsState {
         let visibleOverlayIndexes: Set<Int>
         let wasThumbnailVisible: Bool
@@ -29,11 +35,13 @@ class OverlayManager {
     // MARK: - Initialization
     
     init() {
+        let restoredRectangle = Self.loadRectangleRestore()
+
         /// Load the last saved rectangle position or use the default
-        rectangle = Self.loadRectangle()
+        rectangle = restoredRectangle.rect
         
         /// Load the last saved menu position or position it 20px below the rectangle
-        menuRect = Self.loadMenuRect(for: rectangle)
+        menuRect = Self.loadMenuRect(for: restoredRectangle)
     }
     
     // MARK: - Public API
@@ -423,41 +431,81 @@ class OverlayManager {
     }
     
     /// Loads the rectangle's position and size from UserDefaults. Returns nil if loading fails.
-    private static func loadRectangle() -> NSRect {
+    private static func loadRectangleRestore() -> RestoredRect {
         guard let frameDict = UserDefaults.standard.dictionary(forKey: Constants.rectangleKey) as? [String: CGFloat],
               let x = frameDict["x"],
               let y = frameDict["y"],
               let width = frameDict["width"],
               let height = frameDict["height"] else {
-            return getDefaultRectangle()
+            return defaultRestoredRectangle()
         }
         
         let rectangle = NSRect(x: x, y: y, width: width, height: height)
-        
-        return isRectangleVisible(rectangle) ? rectangle : getDefaultRectangle()
+        return normalizeRestoredRect(rectangle, wasSaved: true) ?? defaultRestoredRectangle(wasRepaired: true)
     }
     
     /// Loads the menu rectangle's position from UserDefaults, falling back to 20px below the selection rectangle.
-    private static func loadMenuRect(for rectangle: NSRect) -> NSRect {
+    private static func loadMenuRect(for restoredRectangle: RestoredRect) -> NSRect {
         let menuWidth = MenuBarLayout.totalWidth
         let menuHeight = MenuBarLayout.height
         let size = (menuWidth, menuHeight)
+
+        if restoredRectangle.wasRepaired {
+            return normalizedDefaultMenuRect(for: restoredRectangle, size: size)
+        }
         
         if let frameDict = UserDefaults.standard.dictionary(forKey: Constants.menuRectKey) as? [String: CGFloat],
            let x = frameDict["x"],
            let y = frameDict["y"] {
             let menuRect = NSRect(x: x, y: y, width: menuWidth, height: menuHeight)
-            return isRectangleVisible(menuRect) ? menuRect : getDefaultMenuRect(for: rectangle, size: size)
+            return normalizeRestoredRect(menuRect, wasSaved: true)?.rect ?? normalizedDefaultMenuRect(for: restoredRectangle, size: size)
         }
         
-        return getDefaultMenuRect(for: rectangle, size: size)
+        return normalizedDefaultMenuRect(for: restoredRectangle, size: size)
     }
     
-    /// Checks if any part of the rectangle is visible on a screen.
-    private static func isRectangleVisible(_ rect: NSRect) -> Bool {
-        return NSScreen.screens.contains { screen in
-            rect.intersects(screen.frame)
+    private static func normalizeRestoredRect(_ rect: NSRect, wasSaved: Bool) -> RestoredRect? {
+        if let screen = screenContainingOrigin(of: rect) {
+            return RestoredRect(rect: rect, screenFrame: screen.frame, wasRepaired: false)
         }
+        
+        guard let screen = NSScreen.screens.first(where: { rect.intersects($0.frame) }) else {
+            return nil
+        }
+        
+        return RestoredRect(
+            rect: clampRectOrigin(rect, to: screen.frame),
+            screenFrame: screen.frame,
+            wasRepaired: wasSaved
+        )
+    }
+    
+    private static func screenContainingOrigin(of rect: NSRect) -> NSScreen? {
+        NSScreen.screens.first { $0.frame.contains(rect.origin) }
+    }
+    
+    private static func clampRectOrigin(_ rect: NSRect, to screenFrame: NSRect) -> NSRect {
+        let maxX = max(screenFrame.minX, screenFrame.maxX - rect.width)
+        let maxY = max(screenFrame.minY, screenFrame.maxY - rect.height)
+        
+        return NSRect(
+            x: min(max(rect.minX, screenFrame.minX), maxX),
+            y: min(max(rect.minY, screenFrame.minY), maxY),
+            width: rect.width,
+            height: rect.height
+        )
+    }
+
+    private static func defaultRestoredRectangle(wasRepaired: Bool = false) -> RestoredRect {
+        let defaultRect = getDefaultRectangle()
+        let screenFrame = screenContainingOrigin(of: defaultRect)?.frame ?? NSScreen.main?.frame ?? defaultRect
+
+        return RestoredRect(rect: defaultRect, screenFrame: screenFrame, wasRepaired: wasRepaired)
+    }
+
+    private static func normalizedDefaultMenuRect(for restoredRectangle: RestoredRect, size: (CGFloat, CGFloat)) -> NSRect {
+        let menuRect = getDefaultMenuRect(for: restoredRectangle.rect, size: size)
+        return clampRectOrigin(menuRect, to: restoredRectangle.screenFrame)
     }
     
     private static func getDefaultRectangle() -> NSRect {
@@ -495,8 +543,9 @@ class OverlayManager {
     func resetPositions() {
         UserDefaults.standard.removeObject(forKey: Constants.rectangleKey)
         UserDefaults.standard.removeObject(forKey: Constants.menuRectKey)
-        rectangle = Self.loadRectangle()
-        menuRect = Self.loadMenuRect(for: rectangle)
+        let restoredRectangle = Self.loadRectangleRestore()
+        rectangle = restoredRectangle.rect
+        menuRect = Self.loadMenuRect(for: restoredRectangle)
         refreshOverlays()
     }
 }
