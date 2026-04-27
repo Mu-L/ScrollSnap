@@ -66,30 +66,8 @@ class OverlayManager {
             
             return overlayWindow
         }
-        
-        // Find the windows for the rectangle and menu bar
-        let rectangleWindow = overlayWindows.first(where: { $0.frame.contains(rectangle.origin) })
-        let menuBarWindow = overlayWindows.first(where: { $0.frame.contains(menuRect.origin) })
 
-        // Use a Set to handle cases where they are in the same window
-        var windowsToShow = Set<NSWindow>()
-        if let rectangleWindow = rectangleWindow {
-            windowsToShow.insert(rectangleWindow)
-        }
-        if let menuBarWindow = menuBarWindow {
-            windowsToShow.insert(menuBarWindow)
-        }
-
-        // Show all unique windows that are needed
-        for window in windowsToShow {
-            window.makeKeyAndOrderFront(nil)
-        }
-
-        // Finally, ensure the app is active and the rectangle's window has focus
-        if let rectangleWindow = rectangleWindow {
-            rectangleWindow.makeKey()
-            NSApp.activate(ignoringOtherApps: true)
-        }
+        syncOverlayWindows()
     }
     
     /// Updates the rectangle and persists it to UserDefaults. Refreshes all overlays.
@@ -97,13 +75,8 @@ class OverlayManager {
         let oldRect = self.rectangle
         rectangle = clampRectangleToScreens(rect: newRect)
         saveRectangle(rectangle)
-        
-        // Ensure the overlay window containing the rectangle is frontmost
-        if let targetOverlay = overlayWindows.first(where: { $0.frame.contains(rectangle.origin) }) {
-            // Bring the target overlay to the front and make it key
-            targetOverlay.makeKeyAndOrderFront(nil)
-        }
-        
+
+        syncOverlayWindows()
         refreshOverlays(oldFrame: oldRect, newFrame: rectangle, includesDimensionLabel: true)
     }
     
@@ -113,6 +86,7 @@ class OverlayManager {
         let clampedRect = clampRectangleToScreens(rect: newRect)
         menuRect = clampedRect
         saveMenuRect(menuRect)
+        syncOverlayWindows()
         refreshOverlays(oldFrame: oldRect, newFrame: menuRect)
     }
     
@@ -162,8 +136,8 @@ class OverlayManager {
     func resumeFloatingWindowsAfterSettings() {
         guard let suspendedWindowsState else { return }
 
-        for index in suspendedWindowsState.visibleOverlayIndexes where overlayWindows.indices.contains(index) {
-            overlayWindows[index].makeKeyAndOrderFront(nil)
+        if !suspendedWindowsState.visibleOverlayIndexes.isEmpty {
+            syncOverlayWindows()
         }
 
         if suspendedWindowsState.wasThumbnailVisible {
@@ -548,7 +522,22 @@ class OverlayManager {
         let restoredRectangle = Self.loadRectangleRestore()
         rectangle = restoredRectangle.rect
         menuRect = Self.loadMenuRect(for: restoredRectangle)
+        if suspendedWindowsState == nil {
+            syncOverlayWindows()
+        }
         refreshOverlays()
+    }
+
+    private func syncOverlayWindows() {
+        guard !overlayWindows.isEmpty else { return }
+
+        overlayWindows.forEach { $0.orderFront(nil) }
+
+        if let rectangleWindow = overlayWindows.first(where: { $0.frame.contains(rectangle.origin) }) {
+            rectangleWindow.makeKeyAndOrderFront(nil)
+        }
+
+        NSApp.activate(ignoringOtherApps: true)
     }
 }
 
