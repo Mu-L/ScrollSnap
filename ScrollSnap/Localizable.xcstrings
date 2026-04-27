@@ -1300,50 +1300,50 @@
         }
       }
     },
-    "Reset Selection and Menu Positions" : {
-      "comment" : "Button title that restores the default selection and menu locations.",
+    "Reset Capture Layout" : {
+      "comment" : "Button title that restores the default capture layout.",
       "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Auswahl und Menüpositionen zurücksetzen"
+            "value" : "Aufnahmelayout zurücksetzen"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Reset Selection and Menu Positions"
+            "value" : "Reset Capture Layout"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Restablecer la selección y la posición del menú"
+            "value" : "Restablecer diseño de captura"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Réinitialiser la sélection et la position du menu"
+            "value" : "Réinitialiser la disposition de capture"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "選択範囲とメニューの位置をリセット"
+            "value" : "キャプチャレイアウトをリセット"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Seçim ve menü konumlarını sıfırla"
+            "value" : "Yakalama düzenini sıfırla"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "重置选区和菜单位置"
+            "value" : "重置捕获布局"
           }
         }
       }

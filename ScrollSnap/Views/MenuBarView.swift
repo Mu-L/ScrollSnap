@@ -282,6 +282,16 @@ class MenuBarView: NSView {
             }
             menu.addItem(item)
         }
+
+        menu.addItem(.separator())
+
+        let resetItem = NSMenuItem(
+            title: AppText.resetSelectionAndMenuPositions,
+            action: #selector(resetPositions),
+            keyEquivalent: ""
+        )
+        resetItem.target = self
+        menu.addItem(resetItem)
         
         return menu
     }
@@ -299,5 +309,9 @@ class MenuBarView: NSView {
 
         guard let rawValue = sender.representedObject as? String else { return }
         SaveDestination.fromStoredValue(rawValue).persist()
+    }
+
+    @objc private func resetPositions() {
+        manager?.resetPositions()
     }
 }
