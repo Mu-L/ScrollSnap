@@ -226,13 +226,14 @@ class OverlayManager {
         // Asynchronously wait for the stitching to complete in the background.
         // This frees up the main thread, keeping the app responsive.
         if let finalImage = await stitchingManager.stopStitching() {
+            await recordSuccessfulCaptureForReview()
+
             let selectedDestination = await MainActor.run {
                 SaveDestination.current()
             }
             
             switch selectedDestination.behavior {
             case .clipboard, .preview:
-                await requestReviewIfEligible()
                 await MainActor.run {
                     _ = saveImage(finalImage)
                 }
@@ -240,6 +241,7 @@ class OverlayManager {
                 await MainActor.run {
                     showThumbnail(with: finalImage)
                 }
+                try? await Task.sleep(for: .seconds(1))
                 await requestReviewIfEligible()
             }
         }

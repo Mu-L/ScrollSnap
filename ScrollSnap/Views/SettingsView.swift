@@ -52,7 +52,7 @@ struct SettingsView: View {
     }
 
     private func openAppStoreReviewPage() {
-        guard let url = URL(string: "macappstore://apps.apple.com/app/id6744903723?action=write-review") else {
+        guard let url = URL(string: "https://apps.apple.com/app/id6744903723?action=write-review") else {
             return
         }
 
