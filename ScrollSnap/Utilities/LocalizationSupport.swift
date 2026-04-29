@@ -143,7 +143,7 @@ enum AppText {
     }
 
     static var resetSelectionAndMenuPositions: String {
-        text("Reset Selection and Menu Positions")
+        text("Reset Capture Layout")
     }
 
     static var supportAndFeedback: String {

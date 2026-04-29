@@ -39,3 +39,5 @@ playground.xcworkspace
 /Config/Signing.local.xcconfig
 
 /.DS_Store
+
+notes.md

@@ -56,7 +56,9 @@ struct Constants {
     }
     
     struct Review {
-        static let hasRequestedInitialReviewKey = "HasRequestedInitialReview"
+        static let successfulCaptureCountKey = "ReviewSuccessfulCaptureCount"
+        static let captureCountVersionKey = "ReviewCaptureCountVersion"
+        static let lastReviewAttemptVersionKey = "ReviewLastAttemptVersion"
     }
     
     static let rectangleKey = "LastRectangleFrame"

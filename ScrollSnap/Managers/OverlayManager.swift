@@ -6,6 +6,12 @@
 import SwiftUI
 
 class OverlayManager {
+    private struct RestoredRect {
+        let rect: NSRect
+        let screenFrame: NSRect
+        let wasRepaired: Bool
+    }
+
     private struct SuspendedWindowsState {
         let visibleOverlayIndexes: Set<Int>
         let wasThumbnailVisible: Bool
@@ -20,6 +26,7 @@ class OverlayManager {
     private var dragOffset: NSPoint = .zero
     private var overlayWindows: [NSWindow] = []
     private var isScrollingCaptureActive = false
+    private var isTimerCaptureInFlight = false
     private var captureTimer: Timer?
     private let stitchingManager = StitchingManager()
     var thumbnailWindow: NSWindow?
@@ -28,11 +35,13 @@ class OverlayManager {
     // MARK: - Initialization
     
     init() {
+        let restoredRectangle = Self.loadRectangleRestore()
+
         /// Load the last saved rectangle position or use the default
-        rectangle = Self.loadRectangle()
+        rectangle = restoredRectangle.rect
         
         /// Load the last saved menu position or position it 20px below the rectangle
-        menuRect = Self.loadMenuRect(for: rectangle)
+        menuRect = Self.loadMenuRect(for: restoredRectangle)
     }
     
     // MARK: - Public API
@@ -57,30 +66,8 @@ class OverlayManager {
             
             return overlayWindow
         }
-        
-        // Find the windows for the rectangle and menu bar
-        let rectangleWindow = overlayWindows.first(where: { $0.frame.contains(rectangle.origin) })
-        let menuBarWindow = overlayWindows.first(where: { $0.frame.contains(menuRect.origin) })
 
-        // Use a Set to handle cases where they are in the same window
-        var windowsToShow = Set<NSWindow>()
-        if let rectangleWindow = rectangleWindow {
-            windowsToShow.insert(rectangleWindow)
-        }
-        if let menuBarWindow = menuBarWindow {
-            windowsToShow.insert(menuBarWindow)
-        }
-
-        // Show all unique windows that are needed
-        for window in windowsToShow {
-            window.makeKeyAndOrderFront(nil)
-        }
-
-        // Finally, ensure the app is active and the rectangle's window has focus
-        if let rectangleWindow = rectangleWindow {
-            rectangleWindow.makeKey()
-            NSApp.activate(ignoringOtherApps: true)
-        }
+        syncOverlayWindows()
     }
     
     /// Updates the rectangle and persists it to UserDefaults. Refreshes all overlays.
@@ -88,13 +75,8 @@ class OverlayManager {
         let oldRect = self.rectangle
         rectangle = clampRectangleToScreens(rect: newRect)
         saveRectangle(rectangle)
-        
-        // Ensure the overlay window containing the rectangle is frontmost
-        if let targetOverlay = overlayWindows.first(where: { $0.frame.contains(rectangle.origin) }) {
-            // Bring the target overlay to the front and make it key
-            targetOverlay.makeKeyAndOrderFront(nil)
-        }
-        
+
+        syncOverlayWindows()
         refreshOverlays(oldFrame: oldRect, newFrame: rectangle, includesDimensionLabel: true)
     }
     
@@ -104,6 +86,7 @@ class OverlayManager {
         let clampedRect = clampRectangleToScreens(rect: newRect)
         menuRect = clampedRect
         saveMenuRect(menuRect)
+        syncOverlayWindows()
         refreshOverlays(oldFrame: oldRect, newFrame: menuRect)
     }
     
@@ -153,8 +136,8 @@ class OverlayManager {
     func resumeFloatingWindowsAfterSettings() {
         guard let suspendedWindowsState else { return }
 
-        for index in suspendedWindowsState.visibleOverlayIndexes where overlayWindows.indices.contains(index) {
-            overlayWindows[index].makeKeyAndOrderFront(nil)
+        if !suspendedWindowsState.visibleOverlayIndexes.isEmpty {
+            syncOverlayWindows()
         }
 
         if suspendedWindowsState.wasThumbnailVisible {
@@ -217,13 +200,14 @@ class OverlayManager {
         // Asynchronously wait for the stitching to complete in the background.
         // This frees up the main thread, keeping the app responsive.
         if let finalImage = await stitchingManager.stopStitching() {
+            await recordSuccessfulCaptureForReview()
+
             let selectedDestination = await MainActor.run {
                 SaveDestination.current()
             }
             
             switch selectedDestination.behavior {
             case .clipboard, .preview:
-                await requestReviewIfEligible()
                 await MainActor.run {
                     _ = saveImage(finalImage)
                 }
@@ -231,6 +215,7 @@ class OverlayManager {
                 await MainActor.run {
                     showThumbnail(with: finalImage)
                 }
+                try? await Task.sleep(for: .seconds(1))
                 await requestReviewIfEligible()
             }
         }
@@ -256,10 +241,17 @@ class OverlayManager {
     
     private func setupCaptureTimer() {
         captureTimer = Timer.scheduledTimer(withTimeInterval: 0.25, repeats: true) { [weak self] _ in
-            guard let self = self, self.isScrollingCaptureActive else { return }
+            guard let self = self,
+                  self.isScrollingCaptureActive,
+                  !self.isTimerCaptureInFlight else { return }
+            
+            self.isTimerCaptureInFlight = true
             
             Task {
                 await self.handleTimerCapture()
+                await MainActor.run {
+                    self.isTimerCaptureInFlight = false
+                }
             }
         }
     }
@@ -274,6 +266,7 @@ class OverlayManager {
     private func invalidateCaptureTimer() {
         captureTimer?.invalidate()
         captureTimer = nil
+        isTimerCaptureInFlight = false
     }
     
     // MARK: - Thumbnail Management
@@ -414,41 +407,81 @@ class OverlayManager {
     }
     
     /// Loads the rectangle's position and size from UserDefaults. Returns nil if loading fails.
-    private static func loadRectangle() -> NSRect {
+    private static func loadRectangleRestore() -> RestoredRect {
         guard let frameDict = UserDefaults.standard.dictionary(forKey: Constants.rectangleKey) as? [String: CGFloat],
               let x = frameDict["x"],
               let y = frameDict["y"],
               let width = frameDict["width"],
               let height = frameDict["height"] else {
-            return getDefaultRectangle()
+            return defaultRestoredRectangle()
         }
         
         let rectangle = NSRect(x: x, y: y, width: width, height: height)
-        
-        return isRectangleVisible(rectangle) ? rectangle : getDefaultRectangle()
+        return normalizeRestoredRect(rectangle, wasSaved: true) ?? defaultRestoredRectangle(wasRepaired: true)
     }
     
     /// Loads the menu rectangle's position from UserDefaults, falling back to 20px below the selection rectangle.
-    private static func loadMenuRect(for rectangle: NSRect) -> NSRect {
+    private static func loadMenuRect(for restoredRectangle: RestoredRect) -> NSRect {
         let menuWidth = MenuBarLayout.totalWidth
         let menuHeight = MenuBarLayout.height
         let size = (menuWidth, menuHeight)
+
+        if restoredRectangle.wasRepaired {
+            return normalizedDefaultMenuRect(for: restoredRectangle, size: size)
+        }
         
         if let frameDict = UserDefaults.standard.dictionary(forKey: Constants.menuRectKey) as? [String: CGFloat],
            let x = frameDict["x"],
            let y = frameDict["y"] {
             let menuRect = NSRect(x: x, y: y, width: menuWidth, height: menuHeight)
-            return isRectangleVisible(menuRect) ? menuRect : getDefaultMenuRect(for: rectangle, size: size)
+            return normalizeRestoredRect(menuRect, wasSaved: true)?.rect ?? normalizedDefaultMenuRect(for: restoredRectangle, size: size)
         }
         
-        return getDefaultMenuRect(for: rectangle, size: size)
+        return normalizedDefaultMenuRect(for: restoredRectangle, size: size)
     }
     
-    /// Checks if any part of the rectangle is visible on a screen.
-    private static func isRectangleVisible(_ rect: NSRect) -> Bool {
-        return NSScreen.screens.contains { screen in
-            rect.intersects(screen.frame)
+    private static func normalizeRestoredRect(_ rect: NSRect, wasSaved: Bool) -> RestoredRect? {
+        if let screen = screenContainingOrigin(of: rect) {
+            return RestoredRect(rect: rect, screenFrame: screen.frame, wasRepaired: false)
         }
+        
+        guard let screen = NSScreen.screens.first(where: { rect.intersects($0.frame) }) else {
+            return nil
+        }
+        
+        return RestoredRect(
+            rect: clampRectOrigin(rect, to: screen.frame),
+            screenFrame: screen.frame,
+            wasRepaired: wasSaved
+        )
+    }
+    
+    private static func screenContainingOrigin(of rect: NSRect) -> NSScreen? {
+        NSScreen.screens.first { $0.frame.contains(rect.origin) }
+    }
+    
+    private static func clampRectOrigin(_ rect: NSRect, to screenFrame: NSRect) -> NSRect {
+        let maxX = max(screenFrame.minX, screenFrame.maxX - rect.width)
+        let maxY = max(screenFrame.minY, screenFrame.maxY - rect.height)
+        
+        return NSRect(
+            x: min(max(rect.minX, screenFrame.minX), maxX),
+            y: min(max(rect.minY, screenFrame.minY), maxY),
+            width: rect.width,
+            height: rect.height
+        )
+    }
+
+    private static func defaultRestoredRectangle(wasRepaired: Bool = false) -> RestoredRect {
+        let defaultRect = getDefaultRectangle()
+        let screenFrame = screenContainingOrigin(of: defaultRect)?.frame ?? NSScreen.main?.frame ?? defaultRect
+
+        return RestoredRect(rect: defaultRect, screenFrame: screenFrame, wasRepaired: wasRepaired)
+    }
+
+    private static func normalizedDefaultMenuRect(for restoredRectangle: RestoredRect, size: (CGFloat, CGFloat)) -> NSRect {
+        let menuRect = getDefaultMenuRect(for: restoredRectangle.rect, size: size)
+        return clampRectOrigin(menuRect, to: restoredRectangle.screenFrame)
     }
     
     private static func getDefaultRectangle() -> NSRect {
@@ -486,9 +519,25 @@ class OverlayManager {
     func resetPositions() {
         UserDefaults.standard.removeObject(forKey: Constants.rectangleKey)
         UserDefaults.standard.removeObject(forKey: Constants.menuRectKey)
-        rectangle = Self.loadRectangle()
-        menuRect = Self.loadMenuRect(for: rectangle)
+        let restoredRectangle = Self.loadRectangleRestore()
+        rectangle = restoredRectangle.rect
+        menuRect = Self.loadMenuRect(for: restoredRectangle)
+        if suspendedWindowsState == nil {
+            syncOverlayWindows()
+        }
         refreshOverlays()
+    }
+
+    private func syncOverlayWindows() {
+        guard !overlayWindows.isEmpty else { return }
+
+        overlayWindows.forEach { $0.orderFront(nil) }
+
+        if let rectangleWindow = overlayWindows.first(where: { $0.frame.contains(rectangle.origin) }) {
+            rectangleWindow.makeKeyAndOrderFront(nil)
+        }
+
+        NSApp.activate(ignoringOtherApps: true)
     }
 }
 
