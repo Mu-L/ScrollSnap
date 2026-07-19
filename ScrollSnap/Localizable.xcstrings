@@ -38,6 +38,12 @@
             "value" : "このAppについて"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "정보"
+          }
+        },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -84,6 +90,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ScrollSnapについて"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ScrollSnap에 관하여"
           }
         },
         "tr" : {
@@ -134,6 +146,12 @@
             "value" : "キャンセル"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "취소"
+          }
+        },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -182,6 +200,12 @@
             "value" : "キャプチャ"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "캡처"
+          }
+        },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -192,6 +216,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "截取"
+          }
+        }
+      }
+    },
+    "Check Again" : {
+      "comment" : "Button label in the screen recording permission window that rechecks access.",
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Check Again"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다시 확인"
           }
         }
       }
@@ -228,6 +270,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "中国語（簡体字）"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "중국어(간체)"
           }
         },
         "tr" : {
@@ -278,6 +326,12 @@
             "value" : "クリップボード"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "클립보드"
+          }
+        },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -324,6 +378,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "閉じる"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "닫기"
           }
         },
         "tr" : {
@@ -374,6 +434,12 @@
             "value" : "サポートに連絡"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "지원팀에 문의"
+          }
+        },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -420,6 +486,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "削除"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "삭제"
           }
         },
         "tr" : {
@@ -470,6 +542,12 @@
             "value" : "デスクトップ"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "데스크탑"
+          }
+        },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -516,6 +594,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "書類"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "문서"
           }
         },
         "tr" : {
@@ -566,6 +650,12 @@
             "value" : "ダウンロード"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다운로드"
+          }
+        },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -612,6 +702,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "英語"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "영어"
           }
         },
         "tr" : {
@@ -662,6 +758,12 @@
             "value" : "フランス語"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "프랑스어"
+          }
+        },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -708,6 +810,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "一般"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "일반"
           }
         },
         "tr" : {
@@ -758,6 +866,12 @@
             "value" : "ドイツ語"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "독일어"
+          }
+        },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -806,6 +920,12 @@
             "value" : "日本語"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "일본어"
+          }
+        },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -816,6 +936,60 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "日语"
+          }
+        }
+      }
+    },
+    "Korean" : {
+      "comment" : "Language picker option for Korean.",
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Koreanisch"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Korean"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coreano"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coréen"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "韓国語"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "한국어"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Korece"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "韩语"
           }
         }
       }
@@ -852,6 +1026,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "言語"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "언어"
           }
         },
         "tr" : {
@@ -902,6 +1082,12 @@
             "value" : "移動"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이동"
+          }
+        },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -912,6 +1098,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "移动"
+          }
+        }
+      }
+    },
+    "Open System Settings" : {
+      "comment" : "Button label in the screen recording permission window that opens System Settings.",
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open System Settings"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "시스템 설정 열기"
           }
         }
       }
@@ -948,6 +1152,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "オプション"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "옵션"
           }
         },
         "tr" : {
@@ -998,6 +1208,12 @@
             "value" : "ScrollSnapがそこにスクリーンショットを保存できるように、デスクトップフォルダを選択してください。"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ScrollSnap이 스크린샷을 저장할 수 있도록 데스크탑 폴더를 선택해 주세요."
+          }
+        },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1044,6 +1260,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ScrollSnapがそこにスクリーンショットを保存できるように、書類フォルダを選択してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ScrollSnap이 스크린샷을 저장할 수 있도록 문서 폴더를 선택해 주세요."
           }
         },
         "tr" : {
@@ -1094,6 +1316,12 @@
             "value" : "ScrollSnapがそこにスクリーンショットを保存できるように、ダウンロードフォルダを選択してください。"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ScrollSnap이 스크린샷을 저장할 수 있도록 다운로드 폴더를 선택해 주세요."
+          }
+        },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1142,6 +1370,12 @@
             "value" : "プレビュー"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "미리보기"
+          }
+        },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1152,6 +1386,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "预览"
+          }
+        }
+      }
+    },
+    "Quit" : {
+      "comment" : "Button label in the screen recording permission window that quits the app.",
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quit"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "종료"
           }
         }
       }
@@ -1188,6 +1440,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ScrollSnapを終了"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ScrollSnap 종료"
           }
         },
         "tr" : {
@@ -1238,6 +1496,12 @@
             "value" : "App Storeで評価"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App Store에서 평가하기"
+          }
+        },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1284,6 +1548,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "今すぐ再起動して言語の変更を適用"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "언어 변경 사항을 적용하려면 지금 다시 실행"
           }
         },
         "tr" : {
@@ -1334,6 +1604,12 @@
             "value" : "キャプチャレイアウトをリセット"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "캡처 레이아웃 재설정"
+          }
+        },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1380,6 +1656,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "保存"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "저장"
           }
         },
         "tr" : {
@@ -1430,6 +1712,12 @@
             "value" : "保存先"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "저장 위치"
+          }
+        },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1440,6 +1728,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "保存到"
+          }
+        }
+      }
+    },
+    "Screen Recording Required" : {
+      "comment" : "Title and heading shown when Screen Recording permission is required.",
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Screen Recording Required"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "화면 녹화 권한 필요"
           }
         }
       }
@@ -1476,6 +1782,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "スクリーンショット"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "스크린샷"
           }
         },
         "tr" : {
@@ -1526,6 +1838,12 @@
             "value" : "ScrollSnap設定"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ScrollSnap 설정"
+          }
+        },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1536,6 +1854,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ScrollSnap 设置"
+          }
+        }
+      }
+    },
+    "ScrollSnap needs Screen Recording permission to show the capture overlay and capture your screen. After granting access, return here and check again." : {
+      "comment" : "Message explaining why Screen Recording permission is required and what to do after granting it.",
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ScrollSnap needs Screen Recording permission to show the capture overlay and capture your screen. After granting access, return here and check again."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ScrollSnap이 캡처 오버레이를 표시하고 화면을 캡처하려면 화면 녹화 권한이 필요합니다. 권한을 허용한 후 여기로 돌아와 다시 확인해 주세요."
           }
         }
       }
@@ -1572,6 +1908,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "設定…"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "설정…"
           }
         },
         "tr" : {
@@ -1622,6 +1964,12 @@
             "value" : "スペイン語"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "스페인어"
+          }
+        },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1668,6 +2016,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "サポートとフィードバック"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "지원 및 피드백"
           }
         },
         "tr" : {
@@ -1718,6 +2072,12 @@
             "value" : "システムのデフォルト"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "시스템 기본값"
+          }
+        },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1764,6 +2124,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "トルコ語"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "터키어"
           }
         },
         "tr" : {
@@ -1814,6 +2180,12 @@
             "value" : "バージョン"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "버전"
+          }
+        },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1860,6 +2232,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ScrollSnapへのフィードバック (v%@)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ScrollSnap 피드백 (v%@)"
           }
         },
         "tr" : {
@@ -1910,6 +2288,12 @@
             "value" : "了解"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "확인"
+          }
+        },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1956,6 +2340,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "GIF、動画プレビュー、動く要素を含むページも、より賢い結合処理でキャプチャできます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "동적 콘텐츠에 맞게 개선된 스마트 스티칭으로 GIF, 동영상 미리보기, 움직이는 요소가 포함된 페이지를 캡처할 수 있습니다."
           }
         },
         "tr" : {
@@ -2006,6 +2396,12 @@
             "value" : "動きのあるコンテンツに対応"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "애니메이션 콘텐츠 지원"
+          }
+        },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2052,6 +2448,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "キャプチャオーバーレイとサムネイル操作が、フルスクリーンアプリやmacOS Spacesでも使えるようになりました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이제 전체 화면 앱과 macOS Spaces에서도 캡처 오버레이와 썸네일 컨트롤이 작동합니다."
           }
         },
         "tr" : {
@@ -2102,6 +2504,12 @@
             "value" : "フルスクリーンとSpacesに対応"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "전체 화면 및 Spaces 지원"
+          }
+        },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2148,6 +2556,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "固定ナビゲーションバーや追従ヘッダーがあるページでも、スクロールキャプチャを使えるようになりました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이제 고정 내비게이션 바와 고정 헤더가 있는 페이지에서도 스크롤 캡처를 사용할 수 있습니다."
           }
         },
         "tr" : {
@@ -2198,6 +2612,12 @@
             "value" : "固定ヘッダーに対応"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "고정 헤더 지원"
+          }
+        },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2244,6 +2664,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ScrollSnapの問題報告 (v%@)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ScrollSnap 문제 보고 (v%@)"
           }
         },
         "tr" : {
@@ -2294,6 +2720,12 @@
             "value" : "問題を報告"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "문제 보고"
+          }
+        },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2340,6 +2772,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "フィードバックを送信"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "피드백 보내기"
           }
         },
         "tr" : {
@@ -2390,6 +2828,12 @@
             "value" : "ScrollSnapの新機能"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ScrollSnap의 새로운 기능"
+          }
+        },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2438,6 +2882,12 @@
             "value" : "バージョン %@"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "버전 %@"
+          }
+        },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2484,6 +2934,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "新機能"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "새로운 기능"
           }
         },
         "tr" : {

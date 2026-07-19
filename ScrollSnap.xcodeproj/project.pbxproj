@@ -214,6 +214,7 @@
 				fr,
 				de,
 				ja,
+				ko,
 				es,
 				tr,
 				Base,
