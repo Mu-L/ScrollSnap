@@ -27,6 +27,8 @@ class MenuBarView: NSView {
     private enum OptionsPopupTarget: Equatable {
         case destination(SaveDestination)
         case reset
+        case settings
+        case quit
     }
 
     private enum OptionsPopupLayout {
@@ -36,7 +38,7 @@ class MenuBarView: NSView {
         static let headingHeight: CGFloat = 20
         static let rowHeight: CGFloat = 28
         static let separatorHeight: CGFloat = 9
-        static let resetHeight: CGFloat = 30
+        static let actionHeight: CGFloat = 30
         static let cornerRadius: CGFloat = 8
         static let checkmarkWidth: CGFloat = 24
     }
@@ -173,7 +175,7 @@ class MenuBarView: NSView {
             drawMenuButtonHoverBackground(in: cancelRect)
         }
         
-        if let cancelIcon = configuredSymbol("xmark", accessibilityDescription: AppText.cancelAccessibility) {
+        if let cancelIcon = configuredSymbol("xmark", accessibilityDescription: AppText.dismissCaptureAccessibility) {
             drawSymbol(cancelIcon, in: cancelRect, size: 15)
         }
     }
@@ -366,7 +368,7 @@ class MenuBarView: NSView {
         
         let cancelRect = getCancelButtonRect(for: menuRect)
         if cancelRect.contains(point) {
-            NSApplication.shared.terminate(self)
+            manager?.dismissOverlay()
             return
         }
     }
@@ -444,13 +446,20 @@ class MenuBarView: NSView {
         }
         drawOptionsPopupSeparator(in: getOptionsPopupSeparatorRect(in: popupRect))
 
-        let resetTarget = OptionsPopupTarget.reset
-        if let resetRect = getOptionsPopupRect(for: resetTarget, in: popupRect) {
-            if resetTarget == hoveredOptionsPopupTarget {
-                drawHoveredOptionsPopupRow(resetRect)
+        for (target, title) in [
+            (OptionsPopupTarget.reset, AppText.resetSelectionAndMenuPositions),
+            (.settings, AppText.settings),
+            (.quit, AppText.quitApp)
+        ] {
+            if let rowRect = getOptionsPopupRect(for: target, in: popupRect) {
+                if target == hoveredOptionsPopupTarget {
+                    drawHoveredOptionsPopupRow(rowRect)
+                }
+                drawOptionsPopupText(title, in: rowRect)
             }
-            drawOptionsPopupText(AppText.resetSelectionAndMenuPositions, in: resetRect)
         }
+
+        drawOptionsPopupSeparator(in: getOptionsPopupQuitSeparatorRect(in: popupRect))
     }
 
     private func drawHoveredOptionsPopupRow(_ globalRect: NSRect) {
@@ -525,6 +534,10 @@ class MenuBarView: NSView {
                 destination.persist()
             case .reset:
                 manager?.resetPositions()
+            case .settings:
+                manager?.openSettings()
+            case .quit:
+                manager?.quit()
             }
             hideOptionsPopup()
         }
@@ -540,9 +553,11 @@ class MenuBarView: NSView {
             }
         }
 
-        if let resetRect = getOptionsPopupRect(for: .reset, in: popupRect),
-           resetRect.contains(point) {
-            return .reset
+        for target in [OptionsPopupTarget.reset, .settings, .quit] {
+            if let rowRect = getOptionsPopupRect(for: target, in: popupRect),
+               rowRect.contains(point) {
+                return target
+            }
         }
 
         return nil
@@ -576,12 +591,17 @@ class MenuBarView: NSView {
             + CGFloat(SaveDestination.allCases.count) * OptionsPopupLayout.rowHeight
             + OptionsPopupLayout.separatorHeight
             + OptionsPopupLayout.separatorHeight
-            + OptionsPopupLayout.resetHeight
+            + OptionsPopupLayout.actionHeight * 3
+            + OptionsPopupLayout.separatorHeight
     }
 
     private func getOptionsPopupWidth() -> CGFloat {
         let attributes: [NSAttributedString.Key: Any] = [.font: Constants.Menu.Button.textFont]
-        let titles = SaveDestination.allCases.map(\.localizedTitle) + [AppText.resetSelectionAndMenuPositions]
+        let titles = SaveDestination.allCases.map(\.localizedTitle) + [
+            AppText.resetSelectionAndMenuPositions,
+            AppText.settings,
+            AppText.quitApp
+        ]
         let textWidth = titles.map { $0.size(withAttributes: attributes).width }.max() ?? 0
         let preferredWidth = textWidth + OptionsPopupLayout.padding * 2 + OptionsPopupLayout.checkmarkWidth + 24
         return min(max(220, preferredWidth), screenFrame.width - OptionsPopupLayout.margin * 2)
@@ -619,6 +639,15 @@ class MenuBarView: NSView {
         return NSRect(x: popupRect.minX, y: y, width: popupRect.width, height: OptionsPopupLayout.separatorHeight)
     }
 
+    private func getOptionsPopupQuitSeparatorRect(in popupRect: NSRect) -> NSRect {
+        NSRect(
+            x: popupRect.minX,
+            y: popupRect.minY + OptionsPopupLayout.padding + OptionsPopupLayout.actionHeight,
+            width: popupRect.width,
+            height: OptionsPopupLayout.separatorHeight
+        )
+    }
+
     private func getOptionsPopupRect(for target: OptionsPopupTarget, in popupRect: NSRect) -> NSRect? {
         let firstRowMaxY = popupRect.maxY - OptionsPopupLayout.padding - OptionsPopupLayout.headingHeight
 
@@ -637,9 +666,29 @@ class MenuBarView: NSView {
         case .reset:
             return NSRect(
                 x: popupRect.minX,
+                y: popupRect.minY
+                    + OptionsPopupLayout.padding
+                    + OptionsPopupLayout.actionHeight * 2
+                    + OptionsPopupLayout.separatorHeight,
+                width: popupRect.width,
+                height: OptionsPopupLayout.actionHeight
+            )
+        case .settings:
+            return NSRect(
+                x: popupRect.minX,
+                y: popupRect.minY
+                    + OptionsPopupLayout.padding
+                    + OptionsPopupLayout.actionHeight
+                    + OptionsPopupLayout.separatorHeight,
+                width: popupRect.width,
+                height: OptionsPopupLayout.actionHeight
+            )
+        case .quit:
+            return NSRect(
+                x: popupRect.minX,
                 y: popupRect.minY + OptionsPopupLayout.padding,
                 width: popupRect.width,
-                height: OptionsPopupLayout.resetHeight
+                height: OptionsPopupLayout.actionHeight
             )
         }
     }

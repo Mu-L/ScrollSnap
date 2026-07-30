@@ -195,7 +195,6 @@ private func saveToClipboard(_ pngData: Data) {
     let pasteboard = NSPasteboard.general
     pasteboard.clearContents()
     pasteboard.setData(pngData, forType: .png)
-    NSApplication.shared.terminate(nil)
 }
 
 /// Opens a PNG image in the Preview app by saving it to a temporary file.
@@ -208,7 +207,6 @@ private func openInPreview(_ pngData: Data, _ filename: String = "Screenshot.png
     do {
         try pngData.write(to: tempURL)
         NSWorkspace.shared.open(tempURL)
-        NSApplication.shared.terminate(nil)
     } catch {
         print("Failed to write temporary file for Preview: \(error.localizedDescription)")
     }

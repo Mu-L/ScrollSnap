@@ -4,11 +4,13 @@
 //
 
 import AppKit
+import KeyboardShortcuts
 import SwiftUI
 
 struct SettingsView: View {
     @Environment(\.dismissWindow) private var dismissWindow
 
+    @ObservedObject var loginItemManager: LoginItemManager
     let onResetPositions: () -> Void
     let onAppear: () -> Void
     let onDisappear: () -> Void
@@ -17,6 +19,7 @@ struct SettingsView: View {
     private var selectedLanguageRawValue = AppLanguage.defaultValue.rawValue
     
     @State private var initialLanguageRawValue: String = ""
+    @State private var shortcutFeedback: String?
 
     private var selectedLanguage: Binding<AppLanguage> {
         Binding(
@@ -82,13 +85,17 @@ struct SettingsView: View {
                     Label(AppText.about, systemImage: "info.circle")
                 }
         }
-        .frame(width: 450, height: 270)
+        .frame(width: 470, height: 390)
         .padding(.horizontal, 16)
         .padding(.bottom, 16)
         .navigationTitle(AppText.settingsWindowTitle)
         .onAppear {
             initialLanguageRawValue = selectedLanguageRawValue
+            loginItemManager.refresh()
             onAppear()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+            loginItemManager.refresh()
         }
         .onDisappear(perform: onDisappear)
         .onExitCommand {
@@ -98,6 +105,55 @@ struct SettingsView: View {
     
     private var generalTab: some View {
         Form {
+            Section {
+                KeyboardShortcuts.Recorder(
+                    AppText.globalShortcut,
+                    name: .invokeScrollSnap,
+                    onChange: { _ in shortcutFeedback = nil }
+                )
+                .shortcutValidation(validateShortcut)
+                .keyboardShortcutsConflictPolicy(
+                    .init(menuItem: .block, systemShortcut: .block, disallowed: .block)
+                )
+
+                HStack {
+                    Text(shortcutFeedback ?? AppText.shortcutRequirement)
+                        .font(.caption)
+                        .foregroundStyle(shortcutFeedback == nil ? Color.secondary : Color.red)
+                    Spacer()
+                    Button(AppText.resetShortcut) {
+                        KeyboardShortcuts.reset(.invokeScrollSnap)
+                        shortcutFeedback = nil
+                    }
+                }
+            }
+
+            Section {
+                Toggle(
+                    AppText.launchAtLogin,
+                    isOn: Binding(
+                        get: { loginItemManager.isRegistered },
+                        set: loginItemManager.setRegistered
+                    )
+                )
+
+                if loginItemManager.status == .requiresApproval {
+                    Text(AppText.loginItemRequiresApproval)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
+                    Button(AppText.openLoginItemsSettings) {
+                        loginItemManager.openSystemSettings()
+                    }
+                }
+
+                if let errorMessage = loginItemManager.errorMessage {
+                    Text(errorMessage)
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                }
+            }
+
             Section {
                 Picker("\(AppText.language):", selection: selectedLanguage) {
                     ForEach(AppLanguage.allCases, id: \.self) { language in
@@ -136,6 +192,21 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
+    }
+
+    private func validateShortcut(_ shortcut: KeyboardShortcuts.Shortcut) -> KeyboardShortcuts.ValidationResult {
+        guard !shortcut.modifiers.isDisjoint(with: [.command, .option, .control]) else {
+            shortcutFeedback = AppText.shortcutRequirement
+            return .disallow(reason: AppText.shortcutRequirement)
+        }
+
+        guard !shortcut.isTakenBySystem else {
+            shortcutFeedback = AppText.shortcutSystemConflict
+            return .disallow(reason: AppText.shortcutSystemConflict)
+        }
+
+        shortcutFeedback = nil
+        return .allow
     }
     
     private var aboutTab: some View {

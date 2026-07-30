@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E10000012F10000100AA0001 /* GlobalShortcut.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000112F10000100AA0001 /* GlobalShortcut.swift */; };
+		E10000022F10000100AA0001 /* LoginItemManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000122F10000100AA0001 /* LoginItemManager.swift */; };
+		E10000042F10000100AA0001 /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = E10000522F10000100AA0001 /* KeyboardShortcuts */; };
+		E10000052F10000100AA0001 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000142F10000100AA0001 /* main.swift */; };
+		E10000062F10000100AA0001 /* ScrollSnapLoginItem.app in Embed Login Items */ = {isa = PBXBuildFile; fileRef = E10000162F10000100AA0001 /* ScrollSnapLoginItem.app */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		D40200032F00000100AA0001 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = D40200022F00000100AA0001 /* Localizable.xcstrings */; };
 		D40200052F00000100AA0001 /* LocalizationSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40200042F00000100AA0001 /* LocalizationSupport.swift */; };
 		D40200112F00000100AA0001 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40200102F00000100AA0001 /* SettingsView.swift */; };
@@ -31,7 +36,36 @@
 		D4C1F4E02CEFA2BB00E5A9A8 /* ScreenshotUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C1F4DF2CEFA2BB00E5A9A8 /* ScreenshotUtilities.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		E10000322F10000100AA0001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D4C1F4C32CEF9F6900E5A9A8 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E10000302F10000100AA0001;
+			remoteInfo = ScrollSnapLoginItem;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		E10000242F10000100AA0001 /* Embed Login Items */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = Contents/Library/LoginItems;
+			dstSubfolderSpec = 1;
+			files = (
+				E10000062F10000100AA0001 /* ScrollSnapLoginItem.app in Embed Login Items */,
+			);
+			name = "Embed Login Items";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		E10000112F10000100AA0001 /* GlobalShortcut.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalShortcut.swift; sourceTree = "<group>"; };
+		E10000122F10000100AA0001 /* LoginItemManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginItemManager.swift; sourceTree = "<group>"; };
+		E10000142F10000100AA0001 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		E10000152F10000100AA0001 /* ScrollSnapLoginItem.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ScrollSnapLoginItem.entitlements; sourceTree = "<group>"; };
+		E10000162F10000100AA0001 /* ScrollSnapLoginItem.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ScrollSnapLoginItem.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D40200022F00000100AA0001 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		D40200042F00000100AA0001 /* LocalizationSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationSupport.swift; sourceTree = "<group>"; };
 		D40200102F00000100AA0001 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -62,16 +96,33 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		D4C1F4C82CEF9F6900E5A9A8 /* Frameworks */ = {
+		E10000222F10000100AA0001 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		D4C1F4C82CEF9F6900E5A9A8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E10000042F10000100AA0001 /* KeyboardShortcuts in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		E10000102F10000100AA0001 /* ScrollSnapLoginItem */ = {
+			isa = PBXGroup;
+			children = (
+				E10000142F10000100AA0001 /* main.swift */,
+				E10000152F10000100AA0001 /* ScrollSnapLoginItem.entitlements */,
+			);
+			path = ScrollSnapLoginItem;
+			sourceTree = "<group>";
+		};
 		D43010002E0D000100A0A001 /* Config */ = {
 			isa = PBXGroup;
 			children = (
@@ -86,6 +137,7 @@
 			children = (
 				D4BBCA6C2D5A11370022FF73 /* OverlayManager.swift */,
 				D4BBCA872D7276D20022FF73 /* StitchingManager.swift */,
+				E10000122F10000100AA0001 /* LoginItemManager.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -114,6 +166,7 @@
 				D47C00002F01000100AA1001 /* UpdateFeedbackManager.swift */,
 				D47C00022F01000100AA1001 /* WhatsNewContent.swift */,
 				D4C1F4DF2CEFA2BB00E5A9A8 /* ScreenshotUtilities.swift */,
+				E10000112F10000100AA0001 /* GlobalShortcut.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -132,6 +185,7 @@
 			children = (
 				D43010002E0D000100A0A001 /* Config */,
 				D4C1F4CD2CEF9F6900E5A9A8 /* ScrollSnap */,
+				E10000102F10000100AA0001 /* ScrollSnapLoginItem */,
 				D4C1F4CC2CEF9F6900E5A9A8 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -140,6 +194,7 @@
 			isa = PBXGroup;
 			children = (
 				D4C1F4CB2CEF9F6900E5A9A8 /* ScrollSnap.app */,
+				E10000162F10000100AA0001 /* ScrollSnapLoginItem.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -172,6 +227,23 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		E10000302F10000100AA0001 /* ScrollSnapLoginItem */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E10000432F10000100AA0001 /* Build configuration list for PBXNativeTarget "ScrollSnapLoginItem" */;
+			buildPhases = (
+				E10000212F10000100AA0001 /* Sources */,
+				E10000222F10000100AA0001 /* Frameworks */,
+				E10000232F10000100AA0001 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ScrollSnapLoginItem;
+			productName = ScrollSnapLoginItem;
+			productReference = E10000162F10000100AA0001 /* ScrollSnapLoginItem.app */;
+			productType = "com.apple.product-type.application";
+		};
 		D4C1F4CA2CEF9F6900E5A9A8 /* ScrollSnap */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = D4C1F4DA2CEF9F6A00E5A9A8 /* Build configuration list for PBXNativeTarget "ScrollSnap" */;
@@ -179,14 +251,19 @@
 				D4C1F4C72CEF9F6900E5A9A8 /* Sources */,
 				D4C1F4C82CEF9F6900E5A9A8 /* Frameworks */,
 				D4C1F4C92CEF9F6900E5A9A8 /* Resources */,
+				E10000242F10000100AA0001 /* Embed Login Items */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				E10000312F10000100AA0001 /* PBXTargetDependency */,
 			);
 			name = ScrollSnap;
 			productName = ScrollSnap;
 			productReference = D4C1F4CB2CEF9F6900E5A9A8 /* ScrollSnap.app */;
+			packageProductDependencies = (
+				E10000522F10000100AA0001 /* KeyboardShortcuts */,
+			);
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -199,6 +276,9 @@
 				LastSwiftUpdateCheck = 1510;
 				LastUpgradeCheck = 1510;
 				TargetAttributes = {
+					E10000302F10000100AA0001 = {
+						CreatedOnToolsVersion = 15.1;
+					};
 					D4C1F4CA2CEF9F6900E5A9A8 = {
 						CreatedOnToolsVersion = 15.1;
 					};
@@ -220,16 +300,27 @@
 				Base,
 			);
 			mainGroup = D4C1F4C22CEF9F6900E5A9A8;
+			packageReferences = (
+				E10000512F10000100AA0001 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */,
+			);
 			productRefGroup = D4C1F4CC2CEF9F6900E5A9A8 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
 				D4C1F4CA2CEF9F6900E5A9A8 /* ScrollSnap */,
+				E10000302F10000100AA0001 /* ScrollSnapLoginItem */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		E10000232F10000100AA0001 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D4C1F4C92CEF9F6900E5A9A8 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -244,10 +335,20 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		E10000212F10000100AA0001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E10000052F10000100AA0001 /* main.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D4C1F4C72CEF9F6900E5A9A8 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E10000012F10000100AA0001 /* GlobalShortcut.swift in Sources */,
+				E10000022F10000100AA0001 /* LoginItemManager.swift in Sources */,
 				D40200052F00000100AA0001 /* LocalizationSupport.swift in Sources */,
 				D40200112F00000100AA0001 /* SettingsView.swift in Sources */,
 				D40200212F00000100AA0001 /* ScreenRecordingPermissionView.swift in Sources */,
@@ -271,7 +372,55 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		E10000312F10000100AA0001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E10000302F10000100AA0001 /* ScrollSnapLoginItem */;
+			targetProxy = E10000322F10000100AA0001 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		E10000412F10000100AA0001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D43010012E0D000100A0A001 /* Signing.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = ScrollSnapLoginItem/ScrollSnapLoginItem.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 13;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "ScrollSnap Login Item Dev";
+				INFOPLIST_KEY_LSUIElement = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 3.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.berkergungor.ScrollSnap.dev.LoginItem;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		E10000422F10000100AA0001 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D43010012E0D000100A0A001 /* Signing.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = ScrollSnapLoginItem/ScrollSnapLoginItem.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 13;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "ScrollSnap Login Item";
+				INFOPLIST_KEY_LSUIElement = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 3.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.berkergungor.ScrollSnap.LoginItem;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
 		D4C1F4D82CEF9F6A00E5A9A8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -473,6 +622,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		E10000432F10000100AA0001 /* Build configuration list for PBXNativeTarget "ScrollSnapLoginItem" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E10000412F10000100AA0001 /* Debug */,
+				E10000422F10000100AA0001 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		D4C1F4C62CEF9F6900E5A9A8 /* Build configuration list for PBXProject "ScrollSnap" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -492,6 +650,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		E10000512F10000100AA0001 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sindresorhus/KeyboardShortcuts";
+			requirement = {
+				kind = exactVersion;
+				version = 3.0.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		E10000522F10000100AA0001 /* KeyboardShortcuts */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E10000512F10000100AA0001 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */;
+			productName = KeyboardShortcuts;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = D4C1F4C32CEF9F6900E5A9A8 /* Project object */;
 }

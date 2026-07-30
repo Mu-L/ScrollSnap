@@ -26,6 +26,15 @@ struct WhatsNewHighlight: Identifiable {
 enum WhatsNewContent {
     static let currentHighlights: [WhatsNewHighlight] = [
         WhatsNewHighlight(
+            id: "global-shortcut",
+            symbolName: "keyboard",
+            color: .purple,
+            titleKey: "whatsNew.highlight.globalShortcut.title",
+            titleFallback: "Global Keyboard Shortcut",
+            messageKey: "whatsNew.highlight.globalShortcut.message",
+            messageFallback: "Press ⌃⌥S from anywhere to show ScrollSnap. Dismiss it with × or Esc, and change the shortcut in Settings."
+        ),
+        WhatsNewHighlight(
             id: "sticky-header-support",
             symbolName: "macwindow.on.rectangle",
             color: .blue,

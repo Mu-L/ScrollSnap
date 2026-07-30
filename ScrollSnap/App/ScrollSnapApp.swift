@@ -12,6 +12,7 @@ struct ScrollSnapApp: App {
     var body: some Scene {
         Settings {
             SettingsView(
+                loginItemManager: appDelegate.loginItemManager,
                 onResetPositions: appDelegate.overlayManager.resetPositions,
                 onAppear: {
                     appDelegate.overlayManager.suspendFloatingWindows(for: .settings)
@@ -22,5 +23,20 @@ struct ScrollSnapApp: App {
             )
         }
         .windowResizability(.contentSize)
+        .commands {
+            CommandGroup(replacing: .appSettings) {
+                SettingsLink {
+                    Text(AppText.settings)
+                }
+                .keyboardShortcut(",", modifiers: .command)
+            }
+
+            CommandGroup(replacing: .appTermination) {
+                Button(AppText.quitApp) {
+                    appDelegate.quit()
+                }
+                .keyboardShortcut("q", modifiers: .command)
+            }
+        }
     }
 }
