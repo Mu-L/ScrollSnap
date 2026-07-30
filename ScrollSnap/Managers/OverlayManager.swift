@@ -14,6 +14,7 @@ enum CaptureSessionState {
     case idle
     case selecting
     case capturing
+    case finishing
     case thumbnail
 }
 
@@ -39,11 +40,10 @@ class OverlayManager {
     private var dragOffset: NSPoint = .zero
     private var overlayWindows: [NSWindow] = []
     private var isScrollingCaptureActive = false
-    private var isTimerCaptureInFlight = false
     private var captureSessionID: UUID?
     private var thumbnailSessionID: UUID?
     private var captureTimer: Timer?
-    private let stitchingManager = StitchingManager()
+    private var scrollingCaptureSession: ScrollingCaptureSession?
     var thumbnailWindow: NSWindow?
     private var suspendedWindowsState: SuspendedWindowsState?
     private var activeSuspensionReasons = Set<FloatingWindowSuspensionReason>()
@@ -87,7 +87,7 @@ class OverlayManager {
             sessionState = .idle
         case .capturing:
             cancelScrollingCapture()
-        case .idle, .thumbnail:
+        case .idle, .finishing, .thumbnail:
             break
         }
     }
@@ -240,27 +240,29 @@ class OverlayManager {
             guard let sessionID = captureSessionID,
                   isScrollingCaptureActive else { return }
             isScrollingCaptureActive = false
+            sessionState = .finishing
             Task { [weak self] in
                 await self?.stopScrollingCapture(sessionID: sessionID)
             }
-        case .idle, .thumbnail:
+        case .idle, .finishing, .thumbnail:
             break
         }
     }
     
     /// Stops the scrolling capture process and saves collected images.
     private func stopScrollingCapture(sessionID: UUID) async {
-        guard captureSessionID == sessionID else { return }
+        guard captureSessionID == sessionID,
+              sessionState == .finishing,
+              let scrollingCaptureSession else { return }
 
         isScrollingCaptureActive = false
         invalidateCaptureTimer()
         hideOverlays()
-        
-        // Asynchronously wait for the stitching to complete in the background.
-        // This frees up the main thread, keeping the app responsive.
-        guard let finalImage = await stitchingManager.stopStitching(),
+
+        guard let finalImage = await scrollingCaptureSession.finish(),
               captureSessionID == sessionID else {
             guard captureSessionID == sessionID else { return }
+            self.scrollingCaptureSession = nil
             captureSessionID = nil
             sessionState = .idle
             return
@@ -268,6 +270,7 @@ class OverlayManager {
 
         recordSuccessfulCaptureForReview()
         let selectedDestination = SaveDestination.current()
+        self.scrollingCaptureSession = nil
         captureSessionID = nil
 
         switch selectedDestination.behavior {
@@ -296,23 +299,40 @@ class OverlayManager {
         guard captureSessionID == sessionID,
               sessionState == .capturing else { return }
 
+        let captureRectangle = rectangle
+        let screenshotSessionTask = Task { @MainActor in
+            await ScreenshotCaptureSession(rectangle: captureRectangle)
+        }
+        let scrollingCaptureSession = ScrollingCaptureSession {
+            guard let screenshotSession = await screenshotSessionTask.value else { return nil }
+            return await screenshotSession.capture()
+        }
+        self.scrollingCaptureSession = scrollingCaptureSession
         isScrollingCaptureActive = true
-        
-        let image = await captureSingleScreenshot(rectangle)
+
+        let didStart = await scrollingCaptureSession.start()
 
         guard captureSessionID == sessionID,
               isScrollingCaptureActive,
-              sessionState == .capturing else { return }
+              sessionState == .capturing else {
+            if captureSessionID == sessionID, sessionState == .finishing {
+                return
+            }
+            await scrollingCaptureSession.cancel()
+            if self.scrollingCaptureSession === scrollingCaptureSession {
+                self.scrollingCaptureSession = nil
+            }
+            return
+        }
 
-        guard let image else {
+        guard didStart else {
             isScrollingCaptureActive = false
+            self.scrollingCaptureSession = nil
             captureSessionID = nil
             sessionState = .selecting
             refreshOverlays()
             return
         }
-
-        stitchingManager.startStitching(with: image)
 
         // Allow mouse events to pass through during capture
         // so the underlying app can still be scrolled
@@ -323,35 +343,26 @@ class OverlayManager {
     }
     
     private func setupCaptureTimer(sessionID: UUID) {
-        captureTimer = Timer.scheduledTimer(withTimeInterval: 0.25, repeats: true) { [weak self] _ in
+        let timer = Timer(timeInterval: 0.25, repeats: true) { [weak self] _ in
             Task { @MainActor in
                 guard let self,
                       self.captureSessionID == sessionID,
                       self.isScrollingCaptureActive,
-                      !self.isTimerCaptureInFlight else { return }
+                      self.sessionState == .capturing else { return }
 
-                self.isTimerCaptureInFlight = true
-                await self.handleTimerCapture(sessionID: sessionID)
-                if self.captureSessionID == sessionID {
-                    self.isTimerCaptureInFlight = false
-                }
+                self.scrollingCaptureSession?.requestFrame()
             }
         }
-    }
-    
-    /// Handles capture operations triggered by timer.
-    private func handleTimerCapture(sessionID: UUID) async {
-        guard let newImage = await captureSingleScreenshot(rectangle),
-              captureSessionID == sessionID,
-              isScrollingCaptureActive else { return }
-
-        stitchingManager.addImage(newImage)
+        captureTimer = timer
+        RunLoop.main.add(timer, forMode: .common)
     }
 
     private func cancelScrollingCapture() {
         guard sessionState == .capturing,
               captureSessionID != nil else { return }
 
+        let scrollingCaptureSession = scrollingCaptureSession
+        self.scrollingCaptureSession = nil
         captureSessionID = nil
         isScrollingCaptureActive = false
         invalidateCaptureTimer()
@@ -360,7 +371,7 @@ class OverlayManager {
 
         Task { [weak self] in
             guard let self else { return }
-            _ = await self.stitchingManager.stopStitching()
+            await scrollingCaptureSession?.cancel()
             guard self.sessionState == .capturing,
                   self.captureSessionID == nil else { return }
             self.sessionState = .idle
@@ -370,7 +381,6 @@ class OverlayManager {
     private func invalidateCaptureTimer() {
         captureTimer?.invalidate()
         captureTimer = nil
-        isTimerCaptureInFlight = false
     }
     
     // MARK: - Thumbnail Management

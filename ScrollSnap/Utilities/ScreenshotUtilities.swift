@@ -7,46 +7,58 @@ import ScreenCaptureKit
 
 // MARK: - Public API
 
+@MainActor
+final class ScreenshotCaptureSession {
+    private let filter: SCContentFilter
+    private let configuration: SCStreamConfiguration
+    private let imageSize: NSSize
+
+    init?(rectangle: NSRect) async {
+        guard let activeScreen = screenContainingPoint(rectangle.origin),
+              let captureContext = await resolveCaptureContext(for: activeScreen) else {
+            print("Error: Unable to determine active screen or display.")
+            return nil
+        }
+
+        let adjustedRect = adjustRectForScreen(rectangle, for: activeScreen)
+        let filter = SCContentFilter(
+            display: captureContext.display,
+            excludingApplications: captureContext.excludedApplications,
+            exceptingWindows: []
+        )
+        let scaleFactor = CGFloat(filter.pointPixelScale)
+
+        let configuration = SCStreamConfiguration()
+        configuration.sourceRect = adjustedRect
+        configuration.width = Int((adjustedRect.width * scaleFactor).rounded())
+        configuration.height = Int((adjustedRect.height * scaleFactor).rounded())
+        configuration.colorSpaceName = CGColorSpace.sRGB
+        configuration.showsCursor = false
+
+        self.filter = filter
+        self.configuration = configuration
+        imageSize = adjustedRect.size
+    }
+
+    func capture() async -> NSImage? {
+        do {
+            let image = try await SCScreenshotManager.captureImage(
+                contentFilter: filter,
+                configuration: configuration
+            )
+            return NSImage(cgImage: image, size: imageSize)
+        } catch {
+            print("Error capturing screenshot: \(error.localizedDescription)")
+            return nil
+        }
+    }
+}
+
 /// Captures a single screenshot of the specified rectangle on the active screen.
-///
-/// This function configures ScreenCaptureKit to capture a region excluding the current app (e.g., the overlay UI) and returns the result as an `NSImage`. It’s used for both single captures and as a building block for scrolling captures.
-///
-/// - Parameter rectangle: The `NSRect` defining the capture area in screen coordinates.
-/// - Returns: An `NSImage` of the captured area, or `nil` if capture fails (e.g., due to invalid screen, app, or display).
-/// - Note: Adjusts the rectangle for the screen’s coordinate system and scales the output based on the display’s pixel scale.
+@MainActor
 func captureSingleScreenshot(_ rectangle: NSRect) async -> NSImage? {
-    guard let activeScreen = screenContainingPoint(rectangle.origin),
-          let captureContext = await resolveCaptureContext(for: activeScreen) else {
-        print("Error: Unable to determine active screen or display.")
-        return nil
-    }
-    
-    let adjustedRect = adjustRectForScreen(rectangle, for: activeScreen)
-    let filter = SCContentFilter(
-        display: captureContext.display,
-        excludingApplications: captureContext.excludedApplications,
-        exceptingWindows: []
-    )
-    let scaleFactor = Int(filter.pointPixelScale)
-    
-    let width = Int(adjustedRect.width) * scaleFactor
-    let height = Int(adjustedRect.height) * scaleFactor
-    
-    let config = SCStreamConfiguration()
-    config.sourceRect = adjustedRect
-    config.width = width
-    config.height = height
-    config.colorSpaceName = CGColorSpace.sRGB
-    config.showsCursor = false
-    
-    do {
-        let image = try await SCScreenshotManager.captureImage(contentFilter: filter, configuration: config)
-        let nsImage = NSImage(cgImage: image, size: adjustedRect.size)
-        return nsImage
-    } catch {
-        print("Error capturing screenshot: \(error.localizedDescription)")
-        return nil
-    }
+    guard let session = await ScreenshotCaptureSession(rectangle: rectangle) else { return nil }
+    return await session.capture()
 }
 
 /// Saves the captured image to a specified destination or the default location.

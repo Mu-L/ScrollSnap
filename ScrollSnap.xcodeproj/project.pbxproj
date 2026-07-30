@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D4A100012F20000100AA0001 /* ScrollingCaptureSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4A100022F20000100AA0001 /* ScrollingCaptureSession.swift */; };
+		D4A200012F20000100AA0001 /* ScrollingCaptureSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4A200032F20000100AA0001 /* ScrollingCaptureSessionTests.swift */; };
+		D4A200022F20000100AA0001 /* StitchingManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4A200042F20000100AA0001 /* StitchingManagerTests.swift */; };
 		E10000012F10000100AA0001 /* GlobalShortcut.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000112F10000100AA0001 /* GlobalShortcut.swift */; };
 		E10000022F10000100AA0001 /* LoginItemManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000122F10000100AA0001 /* LoginItemManager.swift */; };
 		E10000042F10000100AA0001 /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = E10000522F10000100AA0001 /* KeyboardShortcuts */; };
@@ -37,6 +40,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		D4A200082F20000100AA0001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D4C1F4C32CEF9F6900E5A9A8 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D4C1F4CA2CEF9F6900E5A9A8;
+			remoteInfo = ScrollSnap;
+		};
 		E10000322F10000100AA0001 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = D4C1F4C32CEF9F6900E5A9A8 /* Project object */;
@@ -61,6 +71,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		D4A100022F20000100AA0001 /* ScrollingCaptureSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollingCaptureSession.swift; sourceTree = "<group>"; };
+		D4A200032F20000100AA0001 /* ScrollingCaptureSessionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollingCaptureSessionTests.swift; sourceTree = "<group>"; };
+		D4A200042F20000100AA0001 /* StitchingManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StitchingManagerTests.swift; sourceTree = "<group>"; };
+		D4A200052F20000100AA0001 /* ScrollSnapTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ScrollSnapTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E10000112F10000100AA0001 /* GlobalShortcut.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalShortcut.swift; sourceTree = "<group>"; };
 		E10000122F10000100AA0001 /* LoginItemManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginItemManager.swift; sourceTree = "<group>"; };
 		E10000142F10000100AA0001 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
@@ -96,6 +110,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		D4A200072F20000100AA0001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E10000222F10000100AA0001 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -114,6 +135,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		D4A200062F20000100AA0001 /* ScrollSnapTests */ = {
+			isa = PBXGroup;
+			children = (
+				D4A200032F20000100AA0001 /* ScrollingCaptureSessionTests.swift */,
+				D4A200042F20000100AA0001 /* StitchingManagerTests.swift */,
+			);
+			path = ScrollSnapTests;
+			sourceTree = "<group>";
+		};
 		E10000102F10000100AA0001 /* ScrollSnapLoginItem */ = {
 			isa = PBXGroup;
 			children = (
@@ -136,6 +166,7 @@
 			isa = PBXGroup;
 			children = (
 				D4BBCA6C2D5A11370022FF73 /* OverlayManager.swift */,
+				D4A100022F20000100AA0001 /* ScrollingCaptureSession.swift */,
 				D4BBCA872D7276D20022FF73 /* StitchingManager.swift */,
 				E10000122F10000100AA0001 /* LoginItemManager.swift */,
 			);
@@ -185,6 +216,7 @@
 			children = (
 				D43010002E0D000100A0A001 /* Config */,
 				D4C1F4CD2CEF9F6900E5A9A8 /* ScrollSnap */,
+				D4A200062F20000100AA0001 /* ScrollSnapTests */,
 				E10000102F10000100AA0001 /* ScrollSnapLoginItem */,
 				D4C1F4CC2CEF9F6900E5A9A8 /* Products */,
 			);
@@ -194,6 +226,7 @@
 			isa = PBXGroup;
 			children = (
 				D4C1F4CB2CEF9F6900E5A9A8 /* ScrollSnap.app */,
+				D4A200052F20000100AA0001 /* ScrollSnapTests.xctest */,
 				E10000162F10000100AA0001 /* ScrollSnapLoginItem.app */,
 			);
 			name = Products;
@@ -227,6 +260,24 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		D4A2000C2F20000100AA0001 /* ScrollSnapTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D4A2000F2F20000100AA0001 /* Build configuration list for PBXNativeTarget "ScrollSnapTests" */;
+			buildPhases = (
+				D4A2000A2F20000100AA0001 /* Sources */,
+				D4A200072F20000100AA0001 /* Frameworks */,
+				D4A2000B2F20000100AA0001 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D4A200092F20000100AA0001 /* PBXTargetDependency */,
+			);
+			name = ScrollSnapTests;
+			productName = ScrollSnapTests;
+			productReference = D4A200052F20000100AA0001 /* ScrollSnapTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		E10000302F10000100AA0001 /* ScrollSnapLoginItem */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = E10000432F10000100AA0001 /* Build configuration list for PBXNativeTarget "ScrollSnapLoginItem" */;
@@ -276,6 +327,10 @@
 				LastSwiftUpdateCheck = 1510;
 				LastUpgradeCheck = 1510;
 				TargetAttributes = {
+					D4A2000C2F20000100AA0001 = {
+						CreatedOnToolsVersion = 15.1;
+						TestTargetID = D4C1F4CA2CEF9F6900E5A9A8;
+					};
 					E10000302F10000100AA0001 = {
 						CreatedOnToolsVersion = 15.1;
 					};
@@ -308,12 +363,20 @@
 			projectRoot = "";
 			targets = (
 				D4C1F4CA2CEF9F6900E5A9A8 /* ScrollSnap */,
+				D4A2000C2F20000100AA0001 /* ScrollSnapTests */,
 				E10000302F10000100AA0001 /* ScrollSnapLoginItem */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		D4A2000B2F20000100AA0001 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E10000232F10000100AA0001 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -335,6 +398,15 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		D4A2000A2F20000100AA0001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D4A200012F20000100AA0001 /* ScrollingCaptureSessionTests.swift in Sources */,
+				D4A200022F20000100AA0001 /* StitchingManagerTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E10000212F10000100AA0001 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -347,6 +419,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D4A100012F20000100AA0001 /* ScrollingCaptureSession.swift in Sources */,
 				E10000012F10000100AA0001 /* GlobalShortcut.swift in Sources */,
 				E10000022F10000100AA0001 /* LoginItemManager.swift in Sources */,
 				D40200052F00000100AA0001 /* LocalizationSupport.swift in Sources */,
@@ -373,6 +446,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		D4A200092F20000100AA0001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D4C1F4CA2CEF9F6900E5A9A8 /* ScrollSnap */;
+			targetProxy = D4A200082F20000100AA0001 /* PBXContainerItemProxy */;
+		};
 		E10000312F10000100AA0001 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = E10000302F10000100AA0001 /* ScrollSnapLoginItem */;
@@ -381,6 +459,46 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		D4A2000D2F20000100AA0001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D43010012E0D000100A0A001 /* Signing.xcconfig */;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.berkergungor.ScrollSnapTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ScrollSnap.app/Contents/MacOS/ScrollSnap";
+			};
+			name = Debug;
+		};
+		D4A2000E2F20000100AA0001 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D43010012E0D000100A0A001 /* Signing.xcconfig */;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.berkergungor.ScrollSnapTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ScrollSnap.app/Contents/MacOS/ScrollSnap";
+			};
+			name = Release;
+		};
 		E10000412F10000100AA0001 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D43010012E0D000100A0A001 /* Signing.xcconfig */;
@@ -622,6 +740,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		D4A2000F2F20000100AA0001 /* Build configuration list for PBXNativeTarget "ScrollSnapTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D4A2000D2F20000100AA0001 /* Debug */,
+				D4A2000E2F20000100AA0001 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		E10000432F10000100AA0001 /* Build configuration list for PBXNativeTarget "ScrollSnapLoginItem" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
