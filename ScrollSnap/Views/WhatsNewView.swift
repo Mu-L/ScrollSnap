@@ -100,7 +100,7 @@ struct WhatsNewView: View {
 
 #Preview {
     WhatsNewView(
-        version: "2.6.0",
+        version: "3.1.0",
         highlights: WhatsNewContent.currentHighlights,
         reportProblem: {},
         sendFeedback: {},

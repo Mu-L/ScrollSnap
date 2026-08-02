@@ -54,31 +54,39 @@ Whether you want to add a completely new language or improve an existing transla
 
 1. **Launch the App**:
 
-- ScrollSnap starts automatically, displaying an overlay with a selection rectangle and menu bar.
+- ScrollSnap displays an overlay with a selection rectangle and menu bar. Dismissing the overlay keeps ScrollSnap running in the background.
 
-2. **Adjust the Selection**:
+2. **Show the Overlay**:
+
+- Press `Control + Option + S` from any app. You can change, disable, or reset this global shortcut in Settings (`Cmd + ,`).
+
+3. **Adjust the Selection**:
 
 - Drag the rectangle to move it or use the resize handles to adjust its size.
 
-3. **Capture a Screenshot**:
+4. **Capture a Screenshot**:
 
 - For scrolling capture, click "Capture" to start, then "Save" to stop and stitch the images, or press Return or keypad Enter when the overlay is focused.
 
-4. **Interact with the Thumbnail**:
+5. **Interact with the Thumbnail**:
 
 - Drag the thumbnail to copy the image elsewhere, swipe right to save, or right-click for options (Show in Finder, Delete, Close).
 
-5. **Save Options**:
+6. **Save Options**:
 
 - Use the "Options" menu to set the save destination (Desktop, Clipboard, etc.).
 
-6. **Settings**:
+7. **Settings**:
 
 - Press `Cmd + ,` to open the settings window, change language, or reset positions if needed.
 
-7. **Quit**:
+8. **Dismiss the Overlay**:
 
-- Press `Esc` or select "Quit ScrollSnap" from the main menu.
+- Press `Esc` or click the close button to dismiss the overlay while keeping ScrollSnap running.
+
+9. **Quit**:
+
+- Press `Cmd + Q` or select "Quit ScrollSnap" from the Options menu.
 
 ## Project Structure
 

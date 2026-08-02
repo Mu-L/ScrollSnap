@@ -10,6 +10,15 @@ enum FloatingWindowSuspensionReason: Hashable {
     case whatsNew
 }
 
+enum CaptureSessionState {
+    case idle
+    case selecting
+    case capturing
+    case finishing
+    case thumbnail
+}
+
+@MainActor
 class OverlayManager {
     private struct RestoredRect {
         let rect: NSRect
@@ -31,12 +40,19 @@ class OverlayManager {
     private var dragOffset: NSPoint = .zero
     private var overlayWindows: [NSWindow] = []
     private var isScrollingCaptureActive = false
-    private var isTimerCaptureInFlight = false
+    private var captureSessionID: UUID?
+    private var thumbnailSessionID: UUID?
     private var captureTimer: Timer?
-    private let stitchingManager = StitchingManager()
+    private var scrollingCaptureSession: ScrollingCaptureSession?
     var thumbnailWindow: NSWindow?
     private var suspendedWindowsState: SuspendedWindowsState?
     private var activeSuspensionReasons = Set<FloatingWindowSuspensionReason>()
+    private(set) var sessionState: CaptureSessionState = .idle
+    var openSettings: () -> Void = {}
+    var quit: () -> Void = {}
+    var canPresentOverlay: Bool {
+        sessionState == .idle && activeSuspensionReasons.isEmpty
+    }
     
     // MARK: - Initialization
     
@@ -52,8 +68,32 @@ class OverlayManager {
     
     // MARK: - Public API
     
-    /// Sets up overlays on all available screens.
-    func setupOverlays() {
+    /// Presents a fresh overlay for the current display topology.
+    @discardableResult
+    func presentOverlay() -> Bool {
+        guard canPresentOverlay else { return false }
+
+        reconcileFramesWithCurrentScreens()
+        rebuildOverlayWindows()
+        sessionState = .selecting
+        syncOverlayWindows()
+        return true
+    }
+
+    func dismissOverlay() {
+        switch sessionState {
+        case .selecting:
+            hideOverlays()
+            sessionState = .idle
+        case .capturing:
+            cancelScrollingCapture()
+        case .idle, .finishing, .thumbnail:
+            break
+        }
+    }
+
+    private func rebuildOverlayWindows() {
+        hideOverlays()
         overlayWindows = NSScreen.screens.map { screen in
             let overlayWindow = OverlayWindow(
                 contentRect: screen.frame,
@@ -74,8 +114,6 @@ class OverlayManager {
             
             return overlayWindow
         }
-
-        syncOverlayWindows()
     }
     
     /// Updates the rectangle and persists it to UserDefaults. Refreshes all overlays.
@@ -190,101 +228,174 @@ class OverlayManager {
     func captureScreenshot() {
         guard !overlayWindows.isEmpty else { return }
 
-        Task {
-            if isScrollingCaptureActive {
-                await stopScrollingCapture()
-            } else {
-                await startScrollingCapture()
+        switch sessionState {
+        case .selecting:
+            let sessionID = UUID()
+            captureSessionID = sessionID
+            sessionState = .capturing
+            Task { [weak self] in
+                await self?.startScrollingCapture(sessionID: sessionID)
             }
+        case .capturing:
+            guard let sessionID = captureSessionID,
+                  isScrollingCaptureActive else { return }
+            isScrollingCaptureActive = false
+            sessionState = .finishing
+            Task { [weak self] in
+                await self?.stopScrollingCapture(sessionID: sessionID)
+            }
+        case .idle, .finishing, .thumbnail:
+            break
         }
     }
     
     /// Stops the scrolling capture process and saves collected images.
-    private func stopScrollingCapture() async {
-        isScrollingCaptureActive = false
-        
-        // Perform UI updates on the main thread first
-        await MainActor.run {
-            invalidateCaptureTimer()
-            hideOverlays()
-        }
-        
-        // Asynchronously wait for the stitching to complete in the background.
-        // This frees up the main thread, keeping the app responsive.
-        if let finalImage = await stitchingManager.stopStitching() {
-            await recordSuccessfulCaptureForReview()
+    private func stopScrollingCapture(sessionID: UUID) async {
+        guard captureSessionID == sessionID,
+              sessionState == .finishing,
+              let scrollingCaptureSession else { return }
 
-            let selectedDestination = await MainActor.run {
-                SaveDestination.current()
+        isScrollingCaptureActive = false
+        invalidateCaptureTimer()
+        hideOverlays()
+
+        guard let finalImage = await scrollingCaptureSession.finish(),
+              captureSessionID == sessionID else {
+            guard captureSessionID == sessionID else { return }
+            self.scrollingCaptureSession = nil
+            captureSessionID = nil
+            sessionState = .idle
+            return
+        }
+
+        recordSuccessfulCaptureForReview()
+        let selectedDestination = SaveDestination.current()
+        self.scrollingCaptureSession = nil
+        captureSessionID = nil
+
+        switch selectedDestination.behavior {
+        case .clipboard, .preview:
+            _ = saveImage(finalImage)
+            sessionState = .idle
+        case .file:
+            guard let thumbnailSessionID = showThumbnail(with: finalImage) else { return }
+
+            do {
+                try await Task.sleep(for: .seconds(1))
+            } catch {
+                return
             }
-            
-            switch selectedDestination.behavior {
-            case .clipboard, .preview:
-                await MainActor.run {
-                    _ = saveImage(finalImage)
-                }
-            case .file:
-                await MainActor.run {
-                    showThumbnail(with: finalImage)
-                }
-                try? await Task.sleep(for: .seconds(1))
-                await requestReviewIfEligible()
-            }
+
+            guard self.thumbnailSessionID == thumbnailSessionID,
+                  sessionState == .thumbnail,
+                  thumbnailWindow?.isVisible == true else { return }
+
+            await requestReviewIfEligible()
         }
     }
     
     /// Starts the scrolling capture process.
-    private func startScrollingCapture() async {
+    private func startScrollingCapture(sessionID: UUID) async {
+        guard captureSessionID == sessionID,
+              sessionState == .capturing else { return }
+
+        let captureRectangle = rectangle
+        let screenshotSessionTask = Task { @MainActor in
+            await ScreenshotCaptureSession(rectangle: captureRectangle)
+        }
+        let scrollingCaptureSession = ScrollingCaptureSession {
+            guard let screenshotSession = await screenshotSessionTask.value else { return nil }
+            return await screenshotSession.capture()
+        }
+        self.scrollingCaptureSession = scrollingCaptureSession
         isScrollingCaptureActive = true
-        
-        if let image = await captureSingleScreenshot(rectangle) {
-            stitchingManager.startStitching(with: image)
+
+        let didStart = await scrollingCaptureSession.start()
+
+        guard captureSessionID == sessionID,
+              isScrollingCaptureActive,
+              sessionState == .capturing else {
+            if captureSessionID == sessionID, sessionState == .finishing {
+                return
+            }
+            await scrollingCaptureSession.cancel()
+            if self.scrollingCaptureSession === scrollingCaptureSession {
+                self.scrollingCaptureSession = nil
+            }
+            return
         }
-        
-        await MainActor.run {
-            // Allow mouse events to pass through during capture
-            // so the underlying app can still be scrolled
-            setOverlayIgnoresMouseEvents(true)
-            
-            setupCaptureTimer()
+
+        guard didStart else {
+            isScrollingCaptureActive = false
+            self.scrollingCaptureSession = nil
+            captureSessionID = nil
+            sessionState = .selecting
             refreshOverlays()
+            return
         }
+
+        // Allow mouse events to pass through during capture
+        // so the underlying app can still be scrolled
+        setOverlayIgnoresMouseEvents(true)
+
+        setupCaptureTimer(sessionID: sessionID)
+        refreshOverlays()
     }
     
-    private func setupCaptureTimer() {
-        captureTimer = Timer.scheduledTimer(withTimeInterval: 0.25, repeats: true) { [weak self] _ in
-            guard let self = self,
-                  self.isScrollingCaptureActive,
-                  !self.isTimerCaptureInFlight else { return }
-            
-            self.isTimerCaptureInFlight = true
-            
-            Task {
-                await self.handleTimerCapture()
-                await MainActor.run {
-                    self.isTimerCaptureInFlight = false
-                }
+    private func setupCaptureTimer(sessionID: UUID) {
+        let timer = Timer(timeInterval: 0.25, repeats: true) { [weak self] _ in
+            Task { @MainActor in
+                guard let self,
+                      self.captureSessionID == sessionID,
+                      self.isScrollingCaptureActive,
+                      self.sessionState == .capturing else { return }
+
+                self.scrollingCaptureSession?.requestFrame()
             }
         }
+        captureTimer = timer
+        RunLoop.main.add(timer, forMode: .common)
     }
-    
-    /// Handles capture operations triggered by timer.
-    private func handleTimerCapture() async {
-        if let newImage = await captureSingleScreenshot(rectangle) {
-            stitchingManager.addImage(newImage)
+
+    private func cancelScrollingCapture() {
+        guard sessionState == .capturing,
+              captureSessionID != nil else { return }
+
+        let scrollingCaptureSession = scrollingCaptureSession
+        self.scrollingCaptureSession = nil
+        captureSessionID = nil
+        isScrollingCaptureActive = false
+        invalidateCaptureTimer()
+        setOverlayIgnoresMouseEvents(false)
+        hideOverlays()
+
+        Task { [weak self] in
+            guard let self else { return }
+            await scrollingCaptureSession?.cancel()
+            guard self.sessionState == .capturing,
+                  self.captureSessionID == nil else { return }
+            self.sessionState = .idle
         }
     }
     
     private func invalidateCaptureTimer() {
         captureTimer?.invalidate()
         captureTimer = nil
-        isTimerCaptureInFlight = false
     }
     
     // MARK: - Thumbnail Management
     
-    private func showThumbnail(with image: NSImage) {
-        guard let screen = NSScreen.screens.first(where: { $0.frame.contains(rectangle.origin) }) else { return }
+    private func showThumbnail(with image: NSImage) -> UUID? {
+        thumbnailSessionID = nil
+
+        guard let screen = NSScreen.screens.first(where: { $0.frame.contains(rectangle.origin) }) else {
+            sessionState = .idle
+            return nil
+        }
+
+        let sessionID = UUID()
+        thumbnailSessionID = sessionID
+        sessionState = .thumbnail
         
         let thumbnailScaleFactor = 0.3
         let thumbnailWidth = max(200, min(image.size.width * thumbnailScaleFactor, 350))  // Minimum width of 200
@@ -310,16 +421,17 @@ class OverlayManager {
         thumbnailWindow?.contentView = thumbnailView
         thumbnailWindow?.orderFrontRegardless()
         thumbnailWindow?.makeKey()
+        return sessionID
     }
     
     func hideThumbnail() {
+        thumbnailSessionID = nil
+
         if let window = thumbnailWindow {
             window.orderOut(nil)
             thumbnailWindow = nil
-            suspendedWindowsState = nil
-            activeSuspensionReasons.removeAll()
-            NSApplication.shared.terminate(nil) // Close app after save or delete
         }
+        sessionState = .idle
     }
     
     // MARK: - Overlay Visibility
@@ -398,6 +510,32 @@ class OverlayManager {
             }
         }
         return clampedRect
+    }
+
+    private func reconcileFramesWithCurrentScreens() {
+        let screenFrames = NSScreen.screens.map(\.frame)
+        guard !screenFrames.isEmpty else { return }
+
+        if !screenFrames.contains(where: { $0.intersects(rectangle) }) {
+            let restoredRectangle = Self.defaultRestoredRectangle(wasRepaired: true)
+            rectangle = restoredRectangle.rect
+            menuRect = Self.loadMenuRect(for: restoredRectangle)
+            saveRectangle(rectangle)
+            saveMenuRect(menuRect)
+            return
+        }
+
+        rectangle = clampRectangleToScreens(rect: rectangle)
+        if !screenFrames.contains(where: { $0.intersects(menuRect) }) {
+            let screenFrame = screenFrames.first(where: { $0.intersects(rectangle) }) ?? screenFrames[0]
+            menuRect = Self.clampRectOrigin(
+                Self.getDefaultMenuRect(for: rectangle, size: (MenuBarLayout.totalWidth, MenuBarLayout.height)),
+                to: screenFrame
+            )
+            saveMenuRect(menuRect)
+        } else {
+            menuRect = clampRectangleToScreens(rect: menuRect)
+        }
     }
     
     // MARK: - UserDefaults Persistence

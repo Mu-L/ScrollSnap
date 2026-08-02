@@ -201,6 +201,38 @@ enum AppText {
         text("Cancel")
     }
 
+    static var dismissCaptureAccessibility: String {
+        text("Dismiss Capture")
+    }
+
+    static var globalShortcut: String {
+        text("Global Shortcut")
+    }
+
+    static var resetShortcut: String {
+        text("Reset to Default")
+    }
+
+    static var shortcutRequirement: String {
+        text("Use Command, Option, or Control with another key.")
+    }
+
+    static var shortcutSystemConflict: String {
+        text("This shortcut is already used by macOS.")
+    }
+
+    static var launchAtLogin: String {
+        text("Launch at Login")
+    }
+
+    static var loginItemRequiresApproval: String {
+        text("Approval is required in System Settings.")
+    }
+
+    static var openLoginItemsSettings: String {
+        text("Open Login Items Settings")
+    }
+
     static var delete: String {
         text("Delete")
     }

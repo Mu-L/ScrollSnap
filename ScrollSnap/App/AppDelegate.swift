@@ -4,23 +4,44 @@
 //
 
 import SwiftUI
+import KeyboardShortcuts
 
+@MainActor
 class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     let overlayManager = OverlayManager()
+    let loginItemManager = LoginItemManager()
     private let updateFeedbackManager = UpdateFeedbackManager()
     private var localKeyEventMonitor: Any?
+    private var shortcutTask: Task<Void, Never>?
     private var screenRecordingPermissionWindow: NSWindow?
     private var whatsNewWindow: NSWindow?
     private var whatsNewWindowVersion: String?
-    private var didSetupOverlays = false
+    private var isLoginLaunch = false
     
     func applicationDidFinishLaunching(_ notification: Notification) {
         updateFeedbackManager.recordLaunch(currentVersion: UpdateFeedbackManager.currentAppVersion)
         cleanupOldTemporaryFiles()
         installLocalKeyEventMonitor()
+        installGlobalShortcutHandler()
+        overlayManager.openSettings = { [weak self] in self?.openSettings() }
+        overlayManager.quit = { [weak self] in self?.quit() }
+
+        isLoginLaunch = isLoginLaunch
+            || ProcessInfo.processInfo.arguments.contains("--launch-at-login")
         
         Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(100))
+            guard !isLoginLaunch else { return }
             handleScreenRecordingPermissionOnLaunch()
+        }
+    }
+
+    func application(_ application: NSApplication, open urls: [URL]) {
+        if urls.contains(where: {
+            $0.scheme == "com.berkergungor.scrollsnap.login"
+                && $0.host == "launch-at-login"
+        }) {
+            isLoginLaunch = true
         }
     }
     
@@ -29,6 +50,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             NSEvent.removeMonitor(localKeyEventMonitor)
             self.localKeyEventMonitor = nil
         }
+        shortcutTask?.cancel()
+        shortcutTask = nil
+    }
+
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        Task { @MainActor in
+            presentCaptureInterface()
+        }
+        return true
     }
 
     func windowWillClose(_ notification: Notification) {
@@ -50,13 +80,21 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     }
     
     private func handleLocalKeyDown(_ event: NSEvent) -> NSEvent? {
+        let modifiers = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
+        if modifiers == .command,
+           event.charactersIgnoringModifiers == "q",
+           event.window is OverlayWindow {
+            quit()
+            return nil
+        }
+
         if isCaptureToggleEvent(event), event.window is OverlayWindow {
             overlayManager.captureScreenshot()
             return nil
         }
         
         if isEscapeEvent(event), event.window is OverlayWindow {
-            NSApplication.shared.terminate(self)
+            overlayManager.dismissOverlay()
             return nil
         }
         
@@ -72,18 +110,55 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         event.charactersIgnoringModifiers == "\u{1B}"
     }
 
+    private func installGlobalShortcutHandler() {
+        shortcutTask = Task { @MainActor [weak self] in
+            for await _ in KeyboardShortcuts.events(.keyUp, for: .invokeScrollSnap) {
+                self?.presentCaptureInterface()
+            }
+        }
+    }
+
+    @MainActor
+    private func presentCaptureInterface() {
+        guard screenRecordingPermissionWindow == nil,
+              whatsNewWindow == nil,
+              overlayManager.canPresentOverlay else {
+            return
+        }
+
+        handleScreenRecordingPermissionOnLaunch()
+    }
+
+    @MainActor
+    func openSettings() {
+        NSApp.activate(ignoringOtherApps: true)
+        guard let appMenu = NSApp.mainMenu?.items.first?.submenu,
+              let settingsIndex = appMenu.items.firstIndex(where: {
+                  $0.keyEquivalent == ","
+                      && $0.keyEquivalentModifierMask.contains(.command)
+              }) else {
+            return
+        }
+
+        appMenu.performActionForItem(at: settingsIndex)
+    }
+
+    func quit() {
+        NSApp.terminate(nil)
+    }
+
     // MARK: - Screen Recording Permission
 
     @MainActor
     private func handleScreenRecordingPermissionOnLaunch() {
-        if setupOverlaysIfScreenRecordingIsAllowed() {
+        if presentOverlayIfScreenRecordingIsAllowed() {
             showWhatsNewWindowIfNeeded()
             return
         }
 
         _ = requestScreenRecordingPermission()
 
-        if !setupOverlaysIfScreenRecordingIsAllowed() {
+        if !presentOverlayIfScreenRecordingIsAllowed() {
             showScreenRecordingPermissionWindow()
         } else {
             showWhatsNewWindowIfNeeded()
@@ -92,16 +167,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     @MainActor
     @discardableResult
-    private func setupOverlaysIfScreenRecordingIsAllowed() -> Bool {
+    private func presentOverlayIfScreenRecordingIsAllowed() -> Bool {
         guard hasScreenRecordingPermission() else { return false }
 
         screenRecordingPermissionWindow?.close()
         screenRecordingPermissionWindow = nil
 
-        guard !didSetupOverlays else { return true }
-        didSetupOverlays = true
-        overlayManager.setupOverlays()
-        return true
+        return overlayManager.presentOverlay()
     }
 
     @MainActor
@@ -151,11 +223,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     @MainActor
     private func checkScreenRecordingPermissionAgain() {
-        if setupOverlaysIfScreenRecordingIsAllowed() {
+        if presentOverlayIfScreenRecordingIsAllowed() {
             showWhatsNewWindowIfNeeded()
         } else {
             _ = requestScreenRecordingPermission()
-            if setupOverlaysIfScreenRecordingIsAllowed() {
+            if presentOverlayIfScreenRecordingIsAllowed() {
                 showWhatsNewWindowIfNeeded()
             }
         }
@@ -212,7 +284,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         )
 
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 576, height: 390),
+            contentRect: NSRect(x: 0, y: 0, width: 576, height: 0),
             styleMask: [.titled, .closable],
             backing: .buffered,
             defer: false
@@ -223,7 +295,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         )
         window.isReleasedWhenClosed = false
         window.delegate = self
-        window.contentView = NSHostingView(rootView: whatsNewView)
+        let hostingView = NSHostingView(rootView: whatsNewView)
+        window.contentView = hostingView
+        window.setContentSize(NSSize(width: 576, height: hostingView.fittingSize.height))
         window.center()
         overlayManager.suspendFloatingWindows(for: .whatsNew)
         window.makeKeyAndOrderFront(nil)

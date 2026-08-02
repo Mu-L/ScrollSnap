@@ -6,119 +6,97 @@
 import AppKit
 import Vision
 
-class StitchingManager {
-    // MARK: - Properties
-    private var runningStitchedImage: NSImage?
-    private var previousImage: NSImage? // The most recent screenshot to use for comparison.
-    private let stitchingQueue = DispatchQueue(label: "com.scrollsnap.stitching", qos: .userInitiated)
+enum OffsetEstimateSource: Equatable {
+    case bandConsensus
+    case validatedBandFallback
+    case fullFrameFallback
+}
+
+struct OffsetEstimate {
+    let translation: CGPoint
+    let confidence: Float
+    let source: OffsetEstimateSource
+}
+
+struct ImageTranslation {
+    let x: CGFloat
+    let y: CGFloat
+    let confidence: Float
+}
+
+protocol VerticalOffsetEstimating {
+    func estimate(from currentImage: CGImage, to previousImage: CGImage) -> OffsetEstimate?
+}
+
+struct VisionOffsetEstimator: VerticalOffsetEstimating {
     private let comparisonBandCount = 5
     private let minimumComparisonBandHeight = 80
-    private let offsetAgreementTolerance: CGFloat = 3
-    
-    // MARK: - Public API
-    
-    func startStitching(with initialImage: NSImage) {
-        runningStitchedImage = initialImage
-        previousImage = initialImage // On start, the initial image is also the previous one.
-    }
-    
-    func addImage(_ image: NSImage) {
-        stitchingQueue.async { [weak self] in
-            guard let self = self else { return }
-            
-            // Ensure we have a base stitched image and a previous image to compare against.
-            guard let baseStitchedImage = self.runningStitchedImage,
-                  let prevImage = self.previousImage else {
-                // This case should ideally not be hit after startStitching is called.
-                self.runningStitchedImage = image
-                self.previousImage = image
-                return
-            }
-            
-            // Calculate the offset by comparing the new image with the *previous* one.
-            // This supports both downward scrolling (positive offset) and upward scrolling (negative offset).
-            guard let offsetInPoints = self.calculateOffset(from: image, to: prevImage) else {
-                // Keep the last reliable reference so the next accepted frame can catch up.
-                return
-            }
+    private let agreementTolerance: CGFloat = 3
+    private let maximumHorizontalMovement: CGFloat = 3
+    private let minimumOverlapFraction: CGFloat = 0.15
+    private let validatedBandConfidence: Float = 0.8
+    private let fullFrameConfidence: Float = 0.9
 
-            if offsetInPoints > 0 {
-                // Downward scroll: composite the new image onto the bottom of the stitched image.
-                guard let newStitchedImage = self.composite(baseImage: baseStitchedImage, newImage: image, offset: offsetInPoints) else {
-                    return
-                }
-
-                self.runningStitchedImage = newStitchedImage
-                self.previousImage = image
-
-            } else if offsetInPoints < 0 {
-                // Upward scroll: crop from the bottom of the stitched image.
-                let cropAmount = abs(offsetInPoints)
-
-                // Validate crop amount is reasonable.
-                guard cropAmount <= baseStitchedImage.size.height,
-                      let croppedImage = self.cropBottomRegion(of: baseStitchedImage, byAmount: cropAmount) else {
-                    self.previousImage = image
-                    return
-                }
-
-                self.runningStitchedImage = croppedImage
-                self.previousImage = image
-
-            } else {
-                // No scroll detected, skip this frame.
-                self.previousImage = image
-            }
-        }
-    }
-    
-    func stopStitching() async -> NSImage? {
-        return await withCheckedContinuation { continuation in
-            // Enqueue a task to run after all previous tasks on the serial queue.
-            // This task will then resume the continuation with the final image.
-            stitchingQueue.async { [weak self] in
-                let finalImage = self?.runningStitchedImage
-                // Clean up state to free memory after stitching completes
-                self?.runningStitchedImage = nil
-                self?.previousImage = nil
-                continuation.resume(returning: finalImage)
-            }
-        }
-    }
-    
-    // MARK: - Private Stitching Methods
-    
-    private func calculateOffset(from currentImage: NSImage, to previousImage: NSImage) -> CGFloat? {
-        guard let currentCG = currentImage.cgImage(forProposedRect: nil, context: nil, hints: nil),
-              let previousCG = previousImage.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
+    func estimate(from currentImage: CGImage, to previousImage: CGImage) -> OffsetEstimate? {
+        guard currentImage.width == previousImage.width,
+              currentImage.height == previousImage.height else {
             return nil
         }
 
-        guard let verticalOffsetInPixels = findReliableVerticalOffset(from: currentCG, to: previousCG) else {
-            return nil
-        }
-
-        // Convert the pixel-based offset from Vision to a point-based offset for AppKit drawing.
-        guard currentImage.size.height > 0 else { return nil }
-        let scale = CGFloat(currentCG.height) / currentImage.size.height
-        return verticalOffsetInPixels / (scale > 0 ? scale : 1.0)
-    }
-
-    private func findReliableVerticalOffset(from image1: CGImage, to image2: CGImage) -> CGFloat? {
-        guard image1.width == image2.width, image1.height == image2.height else {
-            return nil
-        }
-
-        let offsets: [CGFloat] = comparisonBands(for: image1).compactMap { band in
-            guard let band1 = image1.cropping(to: band),
-                  let band2 = image2.cropping(to: band) else {
+        let frameHeight = CGFloat(currentImage.height)
+        let bandTranslations = comparisonBands(for: currentImage).compactMap { band -> ImageTranslation? in
+            guard let currentBand = currentImage.cropping(to: band),
+                  let previousBand = previousImage.cropping(to: band),
+                  let translation = findTranslation(from: currentBand, to: previousBand),
+                  isValid(translation, frameHeight: frameHeight) else {
                 return nil
             }
-
-            return findVerticalOffset(from: band1, to: band2)
+            return translation
         }
 
-        return agreedOffset(from: offsets)
+        if let consensus = bestGroup(in: bandTranslations, minimumCount: 4) {
+            return makeEstimate(from: consensus, source: .bandConsensus)
+        }
+
+        let fullFrame = findTranslation(from: currentImage, to: previousImage)
+        return resolve(
+            bandTranslations: bandTranslations,
+            fullFrameTranslation: fullFrame,
+            frameHeight: frameHeight
+        )
+    }
+
+    func resolve(
+        bandTranslations: [ImageTranslation],
+        fullFrameTranslation: ImageTranslation?,
+        frameHeight: CGFloat
+    ) -> OffsetEstimate? {
+        let validBands = bandTranslations.filter { isValid($0, frameHeight: frameHeight) }
+
+        if let consensus = bestGroup(in: validBands, minimumCount: 4) {
+            return makeEstimate(from: consensus, source: .bandConsensus)
+        }
+
+        guard let fullFrame = fullFrameTranslation,
+              isValid(fullFrame, frameHeight: frameHeight) else { return nil }
+
+        if fullFrame.confidence >= validatedBandConfidence,
+           let partialConsensus = bestGroup(in: validBands, minimumCount: 3),
+           let bandOffset = average(partialConsensus),
+           abs(bandOffset.y - fullFrame.y) <= agreementTolerance {
+            return OffsetEstimate(
+                translation: CGPoint(x: bandOffset.x, y: bandOffset.y),
+                confidence: min(bandOffset.confidence, fullFrame.confidence),
+                source: .validatedBandFallback
+            )
+        }
+
+        guard fullFrame.confidence >= fullFrameConfidence else { return nil }
+        return OffsetEstimate(
+            translation: CGPoint(x: fullFrame.x, y: fullFrame.y),
+            confidence: fullFrame.confidence,
+            source: .fullFrameFallback
+        )
     }
 
     private func comparisonBands(for image: CGImage) -> [CGRect] {
@@ -143,29 +121,45 @@ class StitchingManager {
         }
     }
 
-    private func agreedOffset(from offsets: [CGFloat]) -> CGFloat? {
-        guard let firstOffset = offsets.first else { return nil }
-        guard offsets.count > 1 else { return firstOffset }
+    private func bestGroup(in translations: [ImageTranslation], minimumCount: Int) -> [ImageTranslation]? {
+        var bestGroup: [ImageTranslation] = []
 
-        let sortedOffsets = offsets.sorted()
-        let requiredAgreementCount = max(2, Int((CGFloat(offsets.count) * 0.75).rounded(.up)))
-        var bestGroup: [CGFloat] = []
-
-        for offset in sortedOffsets {
-            let matchingOffsets = sortedOffsets.filter { abs($0 - offset) <= offsetAgreementTolerance }
-            if matchingOffsets.count > bestGroup.count {
-                bestGroup = matchingOffsets
+        for translation in translations {
+            let group = translations.filter { abs($0.y - translation.y) <= agreementTolerance }
+            if group.count > bestGroup.count {
+                bestGroup = group
             }
         }
 
-        guard bestGroup.count >= requiredAgreementCount else {
-            return nil
-        }
-
-        return bestGroup.reduce(0, +) / CGFloat(bestGroup.count)
+        return bestGroup.count >= minimumCount ? bestGroup : nil
     }
-    
-    private func findVerticalOffset(from image1: CGImage, to image2: CGImage) -> CGFloat? {
+
+    private func makeEstimate(from translations: [ImageTranslation], source: OffsetEstimateSource) -> OffsetEstimate? {
+        guard let translation = average(translations) else { return nil }
+        return OffsetEstimate(
+            translation: CGPoint(x: translation.x, y: translation.y),
+            confidence: translation.confidence,
+            source: source
+        )
+    }
+
+    private func average(_ translations: [ImageTranslation]) -> ImageTranslation? {
+        guard !translations.isEmpty else { return nil }
+        let count = CGFloat(translations.count)
+        return ImageTranslation(
+            x: translations.reduce(0) { $0 + $1.x } / count,
+            y: translations.reduce(0) { $0 + $1.y } / count,
+            confidence: translations.reduce(0) { $0 + $1.confidence } / Float(translations.count)
+        )
+    }
+
+    private func isValid(_ translation: ImageTranslation, frameHeight: CGFloat) -> Bool {
+        let maximumVerticalMovement = frameHeight * (1 - minimumOverlapFraction)
+        return abs(translation.x) <= maximumHorizontalMovement
+            && abs(translation.y) <= maximumVerticalMovement
+    }
+
+    private func findTranslation(from image1: CGImage, to image2: CGImage) -> ImageTranslation? {
         let request = VNTranslationalImageRegistrationRequest(targetedCGImage: image2)
         let handler = VNImageRequestHandler(cgImage: image1, options: [:])
 
@@ -179,10 +173,124 @@ class StitchingManager {
             return nil
         }
 
-        // For a downward scroll, the new image (image1) is below the old one (image2).
-        // To align image1 with image2, it must be shifted UP, resulting in a positive 'ty' value.
-        // For an upward scroll, ty will be negative.
-        return observation.alignmentTransform.ty
+        return ImageTranslation(
+            x: observation.alignmentTransform.tx,
+            y: observation.alignmentTransform.ty,
+            confidence: observation.confidence
+        )
+    }
+}
+
+class StitchingManager {
+    // MARK: - Properties
+    private var runningStitchedImage: NSImage?
+    private var previousImage: NSImage? // The most recent screenshot to use for comparison.
+    private var hasPendingReverseOffset = false
+    private let stitchingQueue = DispatchQueue(label: "com.scrollsnap.stitching", qos: .userInitiated)
+    private let offsetEstimator: any VerticalOffsetEstimating
+    private let movementDeadZone: CGFloat = 3
+
+    init(offsetEstimator: any VerticalOffsetEstimating = VisionOffsetEstimator()) {
+        self.offsetEstimator = offsetEstimator
+    }
+    
+    // MARK: - Public API
+    
+    func startStitching(with initialImage: NSImage) {
+        runningStitchedImage = initialImage
+        previousImage = initialImage // On start, the initial image is also the previous one.
+        hasPendingReverseOffset = false
+    }
+    
+    func addImage(_ image: NSImage) {
+        stitchingQueue.async { [weak self] in
+            guard let self = self else { return }
+            
+            // Ensure we have a base stitched image and a previous image to compare against.
+            guard let baseStitchedImage = self.runningStitchedImage,
+                  let prevImage = self.previousImage else {
+                // This case should ideally not be hit after startStitching is called.
+                self.runningStitchedImage = image
+                self.previousImage = image
+                return
+            }
+            
+            // Calculate the offset by comparing the new image with the *previous* one.
+            // This supports both downward scrolling (positive offset) and upward scrolling (negative offset).
+            guard let offsetInPoints = self.calculateOffset(from: image, to: prevImage) else {
+                // Keep the last reliable reference so the next accepted frame can catch up.
+                self.hasPendingReverseOffset = false
+                return
+            }
+
+            if abs(offsetInPoints) <= self.movementDeadZone {
+                self.hasPendingReverseOffset = false
+                self.previousImage = image
+
+            } else if offsetInPoints > 0 {
+                // Downward scroll: composite the new image onto the bottom of the stitched image.
+                guard let newStitchedImage = self.composite(baseImage: baseStitchedImage, newImage: image, offset: offsetInPoints) else {
+                    return
+                }
+
+                self.hasPendingReverseOffset = false
+                self.runningStitchedImage = newStitchedImage
+                self.previousImage = image
+
+            } else {
+                guard self.hasPendingReverseOffset else {
+                    self.hasPendingReverseOffset = true
+                    return
+                }
+
+                // Upward scroll: crop from the bottom of the stitched image.
+                let cropAmount = abs(offsetInPoints)
+
+                // Validate crop amount is reasonable.
+                guard cropAmount <= baseStitchedImage.size.height,
+                      let croppedImage = self.cropBottomRegion(of: baseStitchedImage, byAmount: cropAmount) else {
+                    self.hasPendingReverseOffset = false
+                    return
+                }
+
+                self.hasPendingReverseOffset = false
+                self.runningStitchedImage = croppedImage
+                self.previousImage = image
+            }
+        }
+    }
+    
+    func stopStitching() async -> NSImage? {
+        return await withCheckedContinuation { continuation in
+            // Enqueue a task to run after all previous tasks on the serial queue.
+            // This task will then resume the continuation with the final image.
+            stitchingQueue.async { [weak self] in
+                let finalImage = self?.runningStitchedImage
+                // Clean up state to free memory after stitching completes
+                self?.runningStitchedImage = nil
+                self?.previousImage = nil
+                self?.hasPendingReverseOffset = false
+                continuation.resume(returning: finalImage)
+            }
+        }
+    }
+    
+    // MARK: - Private Stitching Methods
+    
+    private func calculateOffset(from currentImage: NSImage, to previousImage: NSImage) -> CGFloat? {
+        guard let currentCG = currentImage.cgImage(forProposedRect: nil, context: nil, hints: nil),
+              let previousCG = previousImage.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
+            return nil
+        }
+
+        guard let estimate = offsetEstimator.estimate(from: currentCG, to: previousCG) else {
+            return nil
+        }
+
+        // Convert the pixel-based offset from Vision to a point-based offset for AppKit drawing.
+        guard currentImage.size.height > 0 else { return nil }
+        let scale = CGFloat(currentCG.height) / currentImage.size.height
+        return estimate.translation.y / (scale > 0 ? scale : 1.0)
     }
     
     private func composite(baseImage: NSImage, newImage: NSImage, offset: CGFloat) -> NSImage? {
