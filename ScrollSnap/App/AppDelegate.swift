@@ -284,7 +284,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         )
 
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 576, height: 485),
+            contentRect: NSRect(x: 0, y: 0, width: 576, height: 0),
             styleMask: [.titled, .closable],
             backing: .buffered,
             defer: false
@@ -295,7 +295,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         )
         window.isReleasedWhenClosed = false
         window.delegate = self
-        window.contentView = NSHostingView(rootView: whatsNewView)
+        let hostingView = NSHostingView(rootView: whatsNewView)
+        window.contentView = hostingView
+        window.setContentSize(NSSize(width: 576, height: hostingView.fittingSize.height))
         window.center()
         overlayManager.suspendFloatingWindows(for: .whatsNew)
         window.makeKeyAndOrderFront(nil)

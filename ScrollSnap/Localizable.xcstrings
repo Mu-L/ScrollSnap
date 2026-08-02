@@ -2732,432 +2732,434 @@
         }
       }
     },
-    "whatsNew.highlight.animatedContent.message" : {
-      "comment" : "What's New highlight body for animated content support.",
+    "whatsNew.highlight.backgroundAccess.message" : {
+      "comment" : "What's New highlight body for background access and launch at login.",
       "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Erfasse Seiten mit GIFs, Videovorschauen und bewegten Elementen dank besserer Zusammenführung dynamischer Inhalte."
+            "value" : "Beim Schließen der Aufnahmeoberfläche läuft ScrollSnap jetzt weiter. Du kannst die App außerdem bei der Anmeldung automatisch starten sowie über das Menü „Optionen“ die Einstellungen öffnen oder ScrollSnap beenden."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Capture pages with GIFs, video previews, and moving elements with smarter stitching built for dynamic content."
+            "value" : "Dismissing the capture overlay now keeps ScrollSnap running. You can also launch it automatically when you log in, or open Settings and quit from the Options menu."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Captura páginas con GIFs, vistas previas de video y elementos en movimiento gracias a un ensamblado más inteligente."
+            "value" : "Al cerrar la superposición de captura, ScrollSnap ahora sigue ejecutándose. También puedes iniciarlo automáticamente al iniciar sesión, abrir Ajustes o salir desde el menú Opciones."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Capturez des pages avec GIF, aperçus vidéo et éléments animés grâce à un assemblage plus fiable."
+            "value" : "Fermer l’interface de capture laisse désormais ScrollSnap actif. Vous pouvez aussi le lancer automatiquement à l’ouverture de session, ouvrir Réglages ou quitter l’app depuis le menu Options."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "GIF、動画プレビュー、動く要素を含むページも、より賢い結合処理でキャプチャできます。"
+            "value" : "キャプチャオーバーレイを閉じても、ScrollSnapはバックグラウンドで動作し続けます。ログイン時に自動起動したり、オプションメニューから設定を開いたり終了したりできます。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "동적 콘텐츠에 맞게 개선된 스마트 스티칭으로 GIF, 동영상 미리보기, 움직이는 요소가 포함된 페이지를 캡처할 수 있습니다."
+            "value" : "캡처 화면을 닫아도 ScrollSnap은 계속 실행됩니다. 로그인 시 자동 실행을 켤 수 있으며, 옵션 메뉴에서 설정을 열거나 앱을 종료할 수 있습니다."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "GIF’ler, video önizlemeleri ve hareketli öğeler içeren sayfaları dinamik içeriklere uygun daha akıllı birleştirmeyle yakalayın."
+            "value" : "Yakalama katmanını kapattığınızda ScrollSnap artık çalışmaya devam eder. Ayrıca oturum açtığınızda otomatik olarak başlatabilir, Seçenekler menüsünden Ayarlar'ı açabilir veya uygulamadan çıkabilirsiniz."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "借助更智能的拼接处理，现在可以截取包含 GIF、视频预览和动态元素的页面。"
+            "value" : "关闭截图浮层后，ScrollSnap 现在会继续运行。你还可以让它在登录时自动启动，或从“选项”菜单打开“设置”和退出应用。"
           }
         }
       }
     },
-    "whatsNew.highlight.animatedContent.title" : {
-      "comment" : "What's New highlight title for animated content support.",
+    "whatsNew.highlight.backgroundAccess.title" : {
+      "comment" : "What's New highlight title for background access.",
       "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Unterstützung für animierte Inhalte"
+            "value" : "Im Hintergrund bereit"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Animated Content Support"
+            "value" : "Ready in the Background"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Compatibilidad con contenido animado"
+            "value" : "Listo en segundo plano"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Prise en charge du contenu animé"
+            "value" : "Toujours prêt en arrière-plan"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "動きのあるコンテンツに対応"
+            "value" : "バックグラウンドで待機"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "애니메이션 콘텐츠 지원"
+            "value" : "백그라운드 실행"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hareketli İçerik Desteği"
+            "value" : "Arka Planda Hazır"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "支持动态内容"
+            "value" : "后台随时可用"
           }
         }
       }
     },
-    "whatsNew.highlight.fullscreenSpaces.message" : {
-      "comment" : "What's New highlight body for fullscreen apps and macOS Spaces support.",
+    "whatsNew.highlight.captureReliability.message" : {
+      "comment" : "What's New highlight body for more reliable scrolling captures.",
       "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aufnahme-Overlays und Vorschaubilder funktionieren jetzt auch in Vollbild-Apps und macOS Spaces."
+            "value" : "Scrollende Aufnahmen erfassen jetzt auch das letzte Bild und nutzen eine verbesserte Bewegungserkennung und Zusammenfügung, damit lange Screenshots nicht vorzeitig enden."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Capture overlays and thumbnail controls now work across fullscreen apps and macOS Spaces."
+            "value" : "Scrolling captures now include the final frame and use improved motion detection and stitching, preventing long screenshots from ending early."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Los controles de captura y miniatura ahora funcionan en apps a pantalla completa y en Spaces de macOS."
+            "value" : "Las capturas con desplazamiento ahora incluyen el fotograma final y usan una detección de movimiento y un ensamblado mejorados, evitando que las capturas largas terminen antes de tiempo."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Les commandes de capture et les vignettes fonctionnent désormais dans les apps en plein écran et les Spaces macOS."
+            "value" : "Les captures avec défilement incluent désormais la dernière image et bénéficient d’une détection des mouvements et d’un assemblage améliorés, évitant que les longues captures ne s’arrêtent trop tôt."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "キャプチャオーバーレイとサムネイル操作が、フルスクリーンアプリやmacOS Spacesでも使えるようになりました。"
+            "value" : "スクロールキャプチャに最後のフレームまで含まれるようになり、動きの検出と画像の結合も改善されたため、長いスクリーンショットが途中で切れるのを防ぎます。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "이제 전체 화면 앱과 macOS Spaces에서도 캡처 오버레이와 썸네일 컨트롤이 작동합니다."
+            "value" : "이제 스크롤 캡처가 마지막 프레임까지 포함하며, 움직임 감지와 이미지 연결 정확도가 향상되어 긴 스크린샷이 중간에 잘리는 문제를 방지합니다."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Yakalama katmanları ve küçük önizleme kontrolleri artık tam ekran uygulamalarda ve macOS Spaces’ta çalışıyor."
+            "value" : "Kaydırmalı ekran görüntüleri artık son kareyi de içeriyor ve geliştirilmiş hareket algılama ile birleştirme kullanarak uzun ekran görüntülerinin erken bitmesini önlüyor."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "截图浮层和缩略图控件现在可在全屏应用和 macOS Spaces 中使用。"
+            "value" : "滚动截图现在会包含最后一帧，并采用改进的移动检测和拼接，避免长截图过早结束。"
           }
         }
       }
     },
-    "whatsNew.highlight.fullscreenSpaces.title" : {
-      "comment" : "What's New highlight title for fullscreen apps and macOS Spaces support.",
+    "whatsNew.highlight.captureReliability.title" : {
+      "comment" : "What's New highlight title for more reliable scrolling captures.",
       "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vollbild- und Spaces-Unterstützung"
+            "value" : "Zuverlässigere scrollende Aufnahmen"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fullscreen & Spaces Support"
+            "value" : "More Reliable Scrolling Captures"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Compatibilidad con pantalla completa y Spaces"
+            "value" : "Capturas con desplazamiento más fiables"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Prise en charge du plein écran et de Spaces"
+            "value" : "Captures avec défilement plus fiables"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "フルスクリーンとSpacesに対応"
+            "value" : "より安定したスクロールキャプチャ"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "전체 화면 및 Spaces 지원"
+            "value" : "더 안정적인 스크롤 캡처"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tam Ekran ve Spaces Desteği"
+            "value" : "Daha Güvenilir Kaydırmalı Yakalamalar"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "支持全屏和 Spaces"
+            "value" : "更可靠的滚动截图"
           }
         }
       }
     },
     "whatsNew.highlight.globalShortcut.message" : {
+      "comment" : "What's New highlight body for the customizable global shortcut.",
       "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Drücke überall ⌃⌥S, um ScrollSnap anzuzeigen. Schließe es mit × oder Esc und ändere die Tastenkombination in den Einstellungen."
+            "value" : "Drücke in einer beliebigen App ⌃⌥S, um ScrollSnap anzuzeigen. Passe die Tastenkombination in den Einstellungen an, setze sie zurück oder deaktiviere sie."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Press ⌃⌥S from anywhere to show ScrollSnap. Dismiss it with × or Esc, and change the shortcut in Settings."
+            "value" : "Press ⌃⌥S from any app to show ScrollSnap. Customize, reset, or disable the shortcut in Settings."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pulsa ⌃⌥S desde cualquier lugar para mostrar ScrollSnap. Ciérralo con × o Esc y cambia el atajo en Ajustes."
+            "value" : "Pulsa ⌃⌥S desde cualquier app para mostrar ScrollSnap. Personaliza, restablece o desactiva el atajo en Ajustes."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Appuyez sur ⌃⌥S où que vous soyez pour afficher ScrollSnap. Fermez-le avec × ou Échap et modifiez le raccourci dans Réglages."
+            "value" : "Appuyez sur ⌃⌥S depuis n’importe quelle app pour afficher ScrollSnap. Personnalisez, réinitialisez ou désactivez le raccourci dans Réglages."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "どこからでも⌃⌥Sを押してScrollSnapを表示できます。×またはEscで閉じ、設定でショートカットを変更できます。"
+            "value" : "どのアプリからでも⌃⌥Sを押してScrollSnapを表示できます。設定でショートカットの変更、リセット、無効化ができます。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "어디서든 ⌃⌥S를 눌러 ScrollSnap을 표시하세요. × 또는 Esc로 닫고 설정에서 단축키를 변경할 수 있습니다."
+            "value" : "어느 앱에서든 ⌃⌥S를 눌러 ScrollSnap을 표시하세요. 설정에서 단축키를 변경하거나 재설정 또는 비활성화할 수 있습니다."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ScrollSnap'i her yerden göstermek için ⌃⌥S tuşlarına basın. × veya Esc ile kapatın ve kısayolu Ayarlar'dan değiştirin."
+            "value" : "Herhangi bir uygulamadan ScrollSnap'i göstermek için ⌃⌥S tuşlarına basın. Kısayolu Ayarlar'dan özelleştirebilir, sıfırlayabilir veya devre dışı bırakabilirsiniz."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "在任意位置按下 ⌃⌥S 即可显示 ScrollSnap。使用 × 或 Esc 关闭，并可在“设置”中更改快捷键。"
+            "value" : "在任意应用中按下 ⌃⌥S 即可显示 ScrollSnap。你可以在“设置”中自定义、重置或停用快捷键。"
           }
         }
       }
     },
     "whatsNew.highlight.globalShortcut.title" : {
+      "comment" : "What's New highlight title for the global shortcut.",
       "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Globale Tastenkombination"
+            "value" : "Globale Tastenkombination (⌃⌥S)"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Global Keyboard Shortcut"
+            "value" : "Global Keyboard Shortcut (⌃⌥S)"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Atajo de teclado global"
+            "value" : "Atajo de teclado global (⌃⌥S)"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Raccourci clavier global"
+            "value" : "Raccourci clavier global (⌃⌥S)"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "グローバルキーボードショートカット"
+            "value" : "グローバルキーボードショートカット (⌃⌥S)"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "전역 키보드 단축키"
+            "value" : "전역 키보드 단축키 (⌃⌥S)"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Genel Klavye Kısayolu"
+            "value" : "Genel Klavye Kısayolu (⌃⌥S)"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "全局键盘快捷键"
+            "value" : "全局键盘快捷键 (⌃⌥S)"
           }
         }
       }
     },
-    "whatsNew.highlight.stickyHeader.message" : {
-      "comment" : "What's New highlight body for sticky header support.",
+    "whatsNew.highlight.koreanLanguage.message" : {
+      "comment" : "What's New highlight body for Korean language support.",
       "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Scrollende Aufnahmen funktionieren jetzt auch auf Seiten mit festen Navigationsleisten und fixierten Kopfzeilen."
+            "value" : "ScrollSnap ist jetzt vollständig auf Koreanisch verfügbar."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Scrolling captures now support pages with fixed navigation bars and sticky headers."
+            "value" : "ScrollSnap is now fully available in Korean."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Las capturas con desplazamiento ahora funcionan en páginas con barras de navegación fijas y encabezados adhesivos."
+            "value" : "ScrollSnap ya está disponible íntegramente en coreano."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Les captures avec défilement prennent désormais en charge les barres de navigation fixes et les en-têtes épinglés."
+            "value" : "ScrollSnap est désormais entièrement disponible en coréen."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "固定ナビゲーションバーや追従ヘッダーがあるページでも、スクロールキャプチャを使えるようになりました。"
+            "value" : "ScrollSnapのすべてを韓国語で利用できるようになりました。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "이제 고정 내비게이션 바와 고정 헤더가 있는 페이지에서도 스크롤 캡처를 사용할 수 있습니다."
+            "value" : "이제 ScrollSnap의 모든 기능을 한국어로 사용할 수 있습니다."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kaydırmalı ekran görüntüleri artık sabit gezinme çubukları ve yapışkan başlıklar içeren sayfaları destekliyor."
+            "value" : "ScrollSnap artık tamamen Korece kullanılabilir."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "滚动截图现在支持带有固定导航栏和吸顶页眉的网页。"
+            "value" : "ScrollSnap 现已全面支持韩语。"
           }
         }
       }
     },
-    "whatsNew.highlight.stickyHeader.title" : {
-      "comment" : "What's New highlight title for sticky header support.",
+    "whatsNew.highlight.koreanLanguage.title" : {
+      "comment" : "What's New highlight title for Korean language support.",
       "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Unterstützung für fixierte Kopfzeilen"
+            "value" : "Koreanische Sprachunterstützung"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sticky Header Support"
+            "value" : "Korean Language Support"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Compatibilidad con encabezados fijos"
+            "value" : "Compatibilidad con coreano"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Prise en charge des en-têtes fixes"
+            "value" : "Prise en charge du coréen"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "固定ヘッダーに対応"
+            "value" : "韓国語に対応"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "고정 헤더 지원"
+            "value" : "한국어 지원"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sabit Başlık Desteği"
+            "value" : "Korece Dil Desteği"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "支持固定页眉"
+            "value" : "支持韩语"
           }
         }
       }
